@@ -23,7 +23,7 @@ export function main( app, steps, table ) {
   return html`
     <header>
       <h1 ?data-hidden=${ !app.title }>${ app.title }</h1>
-      <p ?data-hidden=${ !app.task }>${ app.task }</p>
+      <p class="lead" ?data-hidden=${ !app.task }>${ app.task }</p>
     </header>
     <main>
       <table class="table table-striped table-hover">
