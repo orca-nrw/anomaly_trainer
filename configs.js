@@ -38,8 +38,8 @@ export const config = {
     "submit": "Abschicken"
   },
   "logos": "./resources/img/logos/logos.jpg",  // Logos die unter der App dargestellt werden.
-  "topology": [  // Topologische Sortierungsregeln zur Beeinflussung der Reihenfolge in der..
-    [                     // ..die Datenbankoperationen einer Transaktion auftreten können.
+  "topology": [  // Topologische Sortierungsregeln zur Beeinflussung der Reihenfolge in der...
+    [                     // ...die Datenbankoperationen einer Transaktion auftreten können.
       // Standardregeln
       [ "T1,read1", "T1,add_x" ],  // Erst Lesen, dann Addieren.
       [ "T1,add_x", "T1,write" ],  // Erst Addieren, dann Schreiben.
