@@ -256,7 +256,7 @@
         random( 0, 1 ) && table.forEach( row => [ row[ 1 ], row[ 2 ], row[ 3 ], row[ 4 ], row[ 5 ] ] = [ row[ 2 ], row[ 1 ], row[ 3 ], row[ 5 ], row[ 4 ] ] );
 
         // Update main HTML template.
-        this.html.render( this.html.main( this, steps, table ), this.element );
+        this.html.render( this.html.main( this, table ), this.element );
 
         // Trigger 'start' event.
         this.onstart && await this.onstart( { instance: this } );
@@ -268,14 +268,14 @@
        * @readonly
        * @function
        */
-      this.onGenerate = this.start;
+      this.onGenerate = () => this.start().then( () => this.html.render( this.html.inputs( this ), this.element.querySelector( '#inputs' ) ) );
 
       /**
        * When an answer is clicked.
        * @readonly
        * @function
        */
-      this.onAnswer = () => this.html.render( this.html.inputs( this, steps, Object.values( $.formData( this.element ) ) ), this.element.querySelector( '#inputs' ) );
+      this.onAnswer = () => this.html.render( this.html.inputs( this, Object.values( $.formData( this.element ) ) ), this.element.querySelector( '#inputs' ) );
 
       /**
        * When the button to submit a solution is clicked.
@@ -291,8 +291,7 @@
           } );
           return !order.includes( false );
         } );
-        this.html.render( this.html.inputs( this, steps, inputs, solutions ), this.element.querySelector( '#inputs' ) );
-        console.log( 'submit!', steps, inputs, solutions );
+        this.html.render( this.html.inputs( this, inputs, solutions ), this.element.querySelector( '#inputs' ) );
       };
 
     }
