@@ -91,7 +91,7 @@ export function inputs( app, inputs, solutions ) {
         </div>
       ` ) }
     </div>
-    <button type="button" id="submit" class="btn btn-primary" ?disabled=${ !inputs || inputs.includes( '' ) } ?data-hidden=${ app.topology.length === 1 || solutions } @click=${ app.onSubmit } }>${ app.buttons.submit }</button>
+    <button type="button" id="submit" class="btn btn-primary" ?disabled=${ !inputs || inputs.includes( '' ) } ?data-hidden=${ app.topology.length === 1 || solutions } @click=${ app.onSubmit }>${ app.buttons.submit }</button>
     <button type="button" class="btn btn-primary" ?data-hidden=${ app.topology.length > 1 && !solutions } @click=${ app.onGenerate }>${ app.buttons.generate }</button>
   `;
 }
