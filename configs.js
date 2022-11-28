@@ -1,5 +1,5 @@
 /**
- * @overview App configuration of <i>ccmjs</i>-based web component for Anomaly Trainer.
+ * @overview App configurations of <i>ccmjs</i>-based web component for Anomaly Trainer.
  * @author André Kless <andre.kless@web.de> 2022
  * @license The MIT License (MIT)
  */
@@ -10,11 +10,66 @@
  */
 
 /**
- * Basic configurations.
+ * Basic configuration.
  * @type {app_config}
  */
 export const config = {
-  "logos": "./resources/img/logos/logos.jpg"
+  "title": "Anomalie-Trainer",  // Titel der oben in der App dargestellt wird. Unter dem Titel ist die Aufgabenbeschreibung (task).
+  "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
+  "cols": [ "", "T1", "T2", "A", "a1", "a2" ],  // Beschriftung der Tabellenspalten.
+  "ops": {  // Festlegung der bei einer Transaktion möglichen Datenbankoperationen:
+    "read1": "read(A,a)",   // Erste Leseoperation
+    "add_x": "a = a + x",   // Rechenoperation auf dem gelesenen Datenbankattribut.
+    "write": "write(A,a)",  // Schreiboperation
+    "read2": "read(A,a)",   // Zweite Leseoperation
+    "rollb": "rollback"     // Zurückrollen aller Datenbankoperationen einer Transaktion.
+  },
+  "value": { "min": 10, "max": 80 },    // Startwert des Datenbankattributs (Zufallszahl zwischen min und max).
+  "summand": { "min": 1, "max": 9 },    // Summand für die Rechenoperation (Zufallszahl zwischen min und max).
+  "random": {    // Wahrscheinlichkeit mit der eine bestimmte Datenbankoperation..
+    "read2": 3,  // ..in einer Transaktion vorkommt (0: Nie, 1: Immer (default), 3: 1 zu 3).
+    "rollb": 3
+  },
+  "buttons": {   // Beschriftung der Buttons
+    "generate": "Neue Konstellation generieren",
+    "yes": "Ja",
+    "neither": "",
+    "no": "Nein",
+    "submit": "Abschicken"
+  },
+  "logos": "./resources/img/logos/logos.jpg",  // Logos die unter der App dargestellt werden.
+  "topology": [  // Topologische Sortierungsregeln zur Beeinflussung der Reihenfolge in der..
+    [                     // ..die Datenbankoperationen einer Transaktion auftreten können.
+      // Standardregeln
+      [ "T1,read1", "T1,add_x" ],  // Erst Lesen, dann Addieren.
+      [ "T1,add_x", "T1,write" ],  // Erst Addieren, dann Schreiben.
+      [ "T2,read1", "T2,add_x" ],
+      [ "T2,add_x", "T2,write" ],
+      [ "T1,read1", "T1,read2" ],  // Das erste Lesen immer vor einem eventuellen zweiten Lesen.
+      [ "T1,read1", "T1,rollb" ]   // Das erste Lesen immer vor einem eventuellen Zurückrollen.
+    ],
+    {
+      "label": "Lost Update",
+      "rules": [
+        [ "T1,read1", "T2,write" ],
+        [ "T2,write", "T1,write" ]
+      ]
+    },
+    {
+      "label": "Non-Repeatable Read",
+      "rules": [
+        [ "T1,read1", "T2,write" ],
+        [ "T2,write", "T1,read2" ]
+      ]
+    },
+    {
+      "label": "Dirty Read",
+      "rules": [
+        [ "T1,write", "T2,read1" ],
+        [ "T2,read1", "T1,rollb" ]
+      ]
+    }
+  ]
 };
 
 /**
@@ -36,7 +91,7 @@ export const lost_update_gen = {
       [ "T1,add_x", "T1,write" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      // Dirty Read Rules
+      // Lost Update Rules
       [ "T1,read1", "T2,write" ],
       [ "T2,write", "T1,write" ]
     ]
@@ -54,20 +109,21 @@ export const non_repeatable_read_gen = {
     "read1": "read(A,a)",
     "add_x": "a = a + x",
     "write": "write(A,a)",
-    "read2": "read(A,a)"
+    "read2": "read(A,a)",
+    "rollb": "rollback"
   },
   "random": {},
   "topology": [
     [
       // Default Rules
-      [ "T1,read1", "T1,add_x" ],
-      [ "T1,read2", "T1,write" ],
+      [ "T1,read1", "T1,rollb" ],
+      [ "T1,rollb", "T1,add_x" ],
+      [ "T1,add_x", "T1,write" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      [ "T1,read1", "T1,read2" ],
       // Non-Repeatable-Read Rules
-      [ "T1,read1", "T2,write" ],
-      [ "T2,write", "T1,read2" ]
+      [ "T1,read2", "T2,write" ],
+      [ "T2,write", "T1,read1" ]
     ]
   ]
 };

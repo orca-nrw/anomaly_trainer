@@ -43,11 +43,11 @@ Der `versions`-Ordner enthält alles was nötig ist, um auch ältere Versionen w
 Dieses Repository enthält Software und Content.
 Bei der Software handelt es sich um freie Software unter der [MIT-Lizenz](/LICENSE).
 Beim Content handelt es sich um gemeinfreie Inhalte unter der [CC0-Lizenz](https://creativecommons.org/publicdomain/zero/1.0/deed.de).
-Content sind insbesondere die Phrasen in der Basiskonfiguration.
+Content ist insbesondere der Titel und die Aufgabenbeschreibung in der Basiskonfiguration.
 
 ## Hintergrundinformationen
 Der Anomalie-Trainer wurde an der Hochschule Bonn-Rhein-Sieg im Rahmen des [EILD-Projekts](https://github.com/EILD-nrw) von André Kless
-auf Basis von HTML, CSS und JavaScript in Form einer _ccmjs_-basierten Webkomponente im entwickelt.
+auf Basis der Webstandards HTML, CSS und JavaScript in Form einer _ccmjs_-basierten Webkomponente entwickelt.
 
 ## Kontakt
 Wir freuen uns über jedes Feedback und beantworten gern Ihre Fragen.

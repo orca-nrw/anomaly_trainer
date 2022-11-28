@@ -69,7 +69,7 @@
           [ "T1,add_x", "T1,write" ],
           [ "T2,read1", "T2,add_x" ],
           [ "T2,add_x", "T2,write" ],
-          [ "T1,read1", "T1,read2" ],
+          [ "T1,read2", "T1,read1" ],
           [ "T1,read1", "T1,rollb" ]
         ],
         {
@@ -82,8 +82,8 @@
         {
           "label": "Non-Repeatable Read",
           "rules": [
-            [ "T1,read1", "T2,write" ],
-            [ "T2,write", "T1,read2" ]
+            [ "T1,read2", "T2,write" ],
+            [ "T2,write", "T1,read1" ]
           ]
         },
         {
@@ -305,7 +305,7 @@
  * @typedef {object} app_config
  * @prop {array} css - CSS dependencies.
  * @prop {array} helper - Dependency on helper functions.
- * @prop {array} html - HTML template dependencies.
+ * @prop {Object.<string,TemplateResult>} html - HTML template dependencies.
  * @prop {function} [onchange] - When something changes in the app (notation change, show legend, submit, correction, show solution, next phrase).
  * @prop {function|object} [onfinish] - When the finish button is clicked. Sets the finish actions.
  * @prop {function} [onready] - Is called once before the first start of the app.
