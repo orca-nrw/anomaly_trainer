@@ -3,8 +3,12 @@
  * ES6 module that exports useful help functions for <i>ccmjs</i> component developers.
  * @author André Kless <andre.kless@web.de> 2019-2022
  * @license The MIT License (MIT)
- * @version latest (8.4.0)
+ * @version latest (8.4.2)
  * @changes
+ * version 8.4.2 (29.11.2022):
+ * - bugfix for formData(elem):obj - correct return of float values
+ * version 8.4.1 (23.11.2022):
+ * - bugfix for fillForm(elem,obj):void - correct changed checkbox state
  * version 8.4.0 (18.07.2022):
  * - updated progressBar(obj):void
  * version 8.3.0 (25.06.2022):
@@ -1089,7 +1093,7 @@ export const fillForm = ( elem, data ) => {
         else if ( input.value && typeof data[ key ] === 'string' && data[ key ].charAt( 0 ) === '[' )
           decodeJSON( data[ key ], ccm ).forEach( value => { if ( value === input.value ) input.checked = true; } );
         else
-          input.checked = true;
+          input.checked = !!data[ key ];
       }
       else if ( input.type === 'radio' ) {
         if ( data[ key ] === input.value )
@@ -1202,7 +1206,7 @@ export const formData = ( elem, settings = {} ) => {
       data[ name ] = result;
     }
     else if ( input.type === 'number' || input.type === 'range' ) {
-      let value = parseInt( input.value );
+      let value = parseFloat( input.value );
       if ( isNaN( value ) ) value = '';
       data[ name ] = value;
     }

@@ -5,8 +5,12 @@
  * and defines the Custom Element <code>\<ccm-app\></code>.
  * @author André Kless <andre.kless@web.de> 2014-2022
  * @license The MIT License (MIT)
- * @version latest (27.4.0)
+ * @version latest (27.4.2)
  * @changes
+ * version 27.4.2 (04.11.2022)
+ * - bugfix in ccm.helper.html2json: Preserve whitespaces and line breaks in pre-tags.
+ * version 27.4.1 (20.10.2022)
+ * - bugfix in ccm.helper.html for checked checkboxes
  * version 27.4.0 (17.06.2022)
  * - ccm.helper.generateKey returns a Universally Unique Identifier (UUID)
  * - better error handling when using IndexedDB
@@ -517,7 +521,7 @@
      * @description Returns the _ccmjs_ version.
      * @returns {ccm.types.version_nr}
      */
-    version: () => '27.4.0',
+    version: () => '27.4.2',
 
     /**
      * @summary loads resources
@@ -2145,7 +2149,6 @@
             // HTML boolean attributes
             case 'async':
             case 'autofocus':
-            case 'checked':
             case 'defer':
             case 'disabled':
             case 'ismap':
@@ -2153,6 +2156,12 @@
             case 'required':
             case 'selected':
               if ( value ) element[ key ] = true;
+              break;
+            case 'checked':
+              if ( value ) {
+                element[ key ] = true;
+                element.setAttribute( key, '' );
+              }
               break;
             case 'readonly':
               if ( value ) element.readOnly = true;
@@ -2249,7 +2258,7 @@
         [ ...html.childNodes ].forEach( child => {
           if ( child.nodeType === Node.COMMENT_NODE )
             return child.parentNode.removeChild( child );
-          if ( child.nodeValue )
+          if ( child.nodeValue && !child.parentElement?.closest( 'pre' ) )
             child.nodeValue = child.nodeValue.replace( /\s+/g, ' ' );
           if ( ccm.helper.isElement( child ) || child.nodeValue.trim() )
             json.inner.push( ccm.helper.isElement( child ) ? ccm.helper.html2json( child ) : child.textContent );

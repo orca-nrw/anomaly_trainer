@@ -3,7 +3,7 @@
  * @author André Kless <andre.kless@web.de> 2022
  */
 
-import { html, render } from '../libs/lit/lit.js';
+import { html, render } from '../libs/lit/lit.min.js';
 export { render };
 
 /**
@@ -19,6 +19,7 @@ export { render };
  * @returns {TemplateResult}
  */
 export function main( app, table ) {
+  const cols = table.shift();
   return html`
     <header>
       <h1 ?data-hidden=${ !app.title }>${ app.title }</h1>
@@ -28,7 +29,7 @@ export function main( app, table ) {
       <table class="table table-striped table-hover">
         <thead>
           <tr>
-            ${ app.cols.map( col => html`<th scope="col">${ col }</th>` ) }
+            ${ cols.map( col => html`<th scope="col">${ col }</th>` ) }
           </tr>
         </thead>
         <tbody class="table-group-divider">

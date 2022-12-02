@@ -22,40 +22,48 @@
    */
   const component = {
     name: 'anomaly_trainer',
-    ccm: './libs/ccm/ccm.js',
+    ccm: './libs/ccm/ccm.min.js',
     config: {
 
       // General Configurations and Dependencies
       "css": [ "ccm.load",
         [  // is loaded serially (not in parallel)
-          "./libs/bootstrap-5/css/bootstrap.css",
-          "./resources/styles.css",
+          "./libs/bootstrap-5/css/bootstrap.min.css",
+          "./resources/styles.min.css",
         ],
-        { "url": "./libs/bootstrap-5/css/bootstrap-fonts.css", "context": "head" }
+        { "url": "./libs/bootstrap-5/css/bootstrap-fonts.min.css", "context": "head" }
       ],
-      "helper": [ "ccm.load", { "url": "./libs/ccm/helper.js", "type": "module" } ],
-      "html": [ "ccm.load", { "url": "./resources/templates.js", "type": "module" } ],
+      "helper": [ "ccm.load", { "url": "./libs/ccm/helper.min.js", "type": "module" } ],
+      "html": [ "ccm.load", { "url": "./resources/templates.min.js", "type": "module" } ],
 //    "logos": "./resources/img/logos/logos.jpg",
 //    "onchange": event => console.log( event ),
       "onfinish": { "restart": true },
 //    "onready": event => console.log( event ),
 //    "onstart": event => console.log( event ),
-      "toposort": [ "ccm.load", { "url": "./libs/toposort/toposort.js#toposort", "type": "module" } ],
+      "toposort": [ "ccm.load", { "url": "./libs/toposort/toposort.min.js#toposort", "type": "module" } ],
 
       // Trainer-specific Configurations
       "title": "Anomalie-Trainer",
       "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
-      "cols": [ "", "T1", "T2", "A", "a1", "a2" ],
+      "cols": [ "", "T1", "T2", "A", "a1", "a2", "B", "b1", "b2" ],
       "ops": {
-        "read1": "read(A,a)",
-        "add_x": "a = a + x",
-        "write": "write(A,a)",
-        "read2": "read(A,a)",
+        "read1": "read({A},{a})",
+        "read2": "read({A},{a})",
+        "add_x": "{a} = {a} + {x}",
+        "write": "write({A},{a})",
         "rollb": "rollback"
       },
-      "value": { "min": 10, "max": 80 },
-      "summand": { "min": 1, "max": 9 },
-      "random": { "read2": 3, "rollb": 3 },
+      "t_ops": [
+        [ "read1", "read2", "add_x", "write", "rollb" ],
+        [ "read1", "add_x", "write" ]
+      ],
+      "random": {
+        "b": 3,
+        "read2": 3,
+        "rollb": 3,
+        "value": [ 10, 80 ],
+        "summand": [ 1, 9 ]
+      },
       "buttons": {
         "generate": "Neue Konstellation generieren",
         "yes": "Ja",
@@ -65,25 +73,25 @@
       },
       "topology": [
         [
-          [ "T1,read1", "T1,add_x" ],
+          [ "T1,read1", "T1,read2" ],
+          [ "T1,read2", "T1,add_x" ],
           [ "T1,add_x", "T1,write" ],
+          [ "T1,read2", "T1,rollb" ],
           [ "T2,read1", "T2,add_x" ],
-          [ "T2,add_x", "T2,write" ],
-          [ "T1,read2", "T1,read1" ],
-          [ "T1,read1", "T1,rollb" ]
+          [ "T2,add_x", "T2,write" ]
         ],
         {
           "label": "Lost Update",
           "rules": [
-            [ "T1,read1", "T2,write" ],
+            [ "T1,read2", "T2,write" ],
             [ "T2,write", "T1,write" ]
           ]
         },
         {
           "label": "Non-Repeatable Read",
           "rules": [
-            [ "T1,read2", "T2,write" ],
-            [ "T2,write", "T1,read1" ]
+            [ "T1,read1", "T2,write" ],
+            [ "T2,write", "T1,read2" ]
           ]
         },
         {
@@ -178,8 +186,9 @@
 
         // Calculation of the two different summands.
         do {
-          summand[ 0 ] = random( this.summand.min, this.summand.max );
-          summand[ 1 ] = random( this.summand.min, this.summand.max );
+          const [ min, max ] = this.random.summand;
+          summand[ 0 ] = random( min, max );
+          summand[ 1 ] = random( min, max );
         } while ( summand[ 0 ] === summand[ 1 ] );
 
         // Reset current constellation of transaction steps.
@@ -187,7 +196,7 @@
 
         // Generate list of all transaction steps.
         for ( let i = 1; i <= 2; i++ )
-          Object.keys( this.ops ).forEach( ( op, j ) => ( i < 2 || j < 3 ) && steps.push( 'T' + i + ',' + op ) );
+          ( this.t_ops ? this.t_ops[ i - 1 ] : Object.keys( this.ops ) ).forEach( op => steps.push( 'T' + i + ',' + op ) );
 
         // Put the transaction steps in a valid order using topological sorting.
         steps = this.toposort( $.shuffleArray( steps ), this.topology[ 0 ] );
@@ -200,10 +209,16 @@
         constellations.push( steps.toString() );
 
         /**
+         * Range of possible start values for a data attribute.
+         * @type {[number,number]}
+         */
+        const [ min, max ] = this.random.value;
+
+        /**
          * Start value for the data attribute ('A') in the database [0] and in transaction T1:a1 [1] and T2:a2 [2].
          * @type {[number,number,number]}
          */
-        const values = [ random( this.value.min, this.value.max ), 0, 0 ];
+        const values = [ random( min, max ), 0, 0, random( min, max ), 0, 0 ];
 
         /**
          * Indicates whether transaction T1 or T2 was rolled back.
@@ -233,12 +248,13 @@
 
         /**
          * Transformation of the transaction steps into the required data structure for the table.
-         * @type {[[number,string,string,number,number|string,number|string]]}
+         * @type {[[number,string,string,number,number|string,number|string,number,number|string,number|string]]}
          */
         const table = steps.map( ( step, i ) => {
 
           let [ t, op ] = step.split( ',' );  // t = Transaction index ([0]: T1, [1]: T2)
           t = parseInt( t[ 1 ] );             // op = Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
+          const b = t === 2 && random( 1, this.random.b );
 
           // Calculate the attribute values A, a1 and a2 for this transaction step.
           switch ( op ) {
@@ -248,12 +264,16 @@
             case 'write': values[ 0 ] = values[ t ]; values[ t ] = 0; break;
             case 'rollb': values[ t ] = 0; break;
           }
-          op = this.ops[ op ].replace( 'x', summand[ t - 1 ] );
+          op = this.ops[ op ];
+          op = op.replaceAll( '{a}', b ? 'b' : 'a' ).replaceAll( '{A}', t === 2 && random( 1, this.random.b ) ? 'B' : 'A' );
+          op = op.replaceAll( '{x}', summand[ t - 1 ] );
           return [ i + 1, t === 1 ? op : '', t === 2 ? op : '', ].concat( values.map( value => value || '-' ) );
         } );
 
         // Randomly swap the transaction steps of T1 and T2.
         random( 0, 1 ) && table.forEach( row => [ row[ 1 ], row[ 2 ], row[ 3 ], row[ 4 ], row[ 5 ] ] = [ row[ 2 ], row[ 1 ], row[ 3 ], row[ 5 ], row[ 4 ] ] );
+
+        table.unshift( this.cols.map( col => col.replaceAll( '{A}', b ? 'B' : 'A' ).replaceAll( '{a}', b ? 'b' : 'a' ) ) );
 
         // Update main HTML template.
         this.html.render( this.html.main( this, table ), this.element );
