@@ -22,25 +22,25 @@
    */
   const component = {
     name: 'anomaly_trainer',
-    ccm: './libs/ccm/ccm.min.js',
+    ccm: './libs/ccm/ccm.js',
     config: {
 
       // General Configurations and Dependencies
       "css": [ "ccm.load",
         [  // is loaded serially (not in parallel)
-          "./libs/bootstrap-5/css/bootstrap.min.css",
-          "./resources/styles.min.css",
+          "./libs/bootstrap-5/css/bootstrap.css",
+          "./resources/styles.css",
         ],
-        { "url": "./libs/bootstrap-5/css/bootstrap-fonts.min.css", "context": "head" }
+        { "url": "./libs/bootstrap-5/css/bootstrap-fonts.css", "context": "head" }
       ],
-      "helper": [ "ccm.load", { "url": "./libs/ccm/helper.min.js", "type": "module" } ],
-      "html": [ "ccm.load", { "url": "./resources/templates.min.js", "type": "module" } ],
+      "helper": [ "ccm.load", { "url": "./libs/ccm/helper.js", "type": "module" } ],
+      "html": [ "ccm.load", { "url": "./resources/templates.js", "type": "module" } ],
 //    "logos": "./resources/img/logos/logos.jpg",
 //    "onchange": event => console.log( event ),
       "onfinish": { "restart": true },
 //    "onready": event => console.log( event ),
 //    "onstart": event => console.log( event ),
-      "toposort": [ "ccm.load", { "url": "./libs/toposort/toposort.min.js#toposort", "type": "module" } ],
+      "toposort": [ "ccm.load", { "url": "./libs/toposort/toposort.js#toposort", "type": "module" } ],
 
       // Trainer-specific Configurations
       "title": "Anomalie-Trainer",

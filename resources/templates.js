@@ -3,7 +3,7 @@
  * @author André Kless <andre.kless@web.de> 2022
  */
 
-import { html, render } from '../libs/lit/lit.min.js';
+import { html, render } from '../libs/lit/lit.js';
 export { render };
 
 /**
