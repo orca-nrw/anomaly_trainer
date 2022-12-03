@@ -46,6 +46,7 @@
       "title": "Anomalie-Trainer",
       "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
       "cols": [ "", "T1", "T2", "A", "a1", "a2", "B", "b1", "b2" ],
+//    "order": [ 0, 1, 4, 7, 3, 6, 5, 8, 2 ],
       "ops": {
         "read1": "read({A},{a})",
         "read2": "read({A},{a})",
@@ -82,21 +83,21 @@
         ],
         {
           "label": "Lost Update",
-          "rules": [
+          "whitelist": [
             [ "T1,read2", "T2,write" ],
             [ "T2,write", "T1,write" ]
           ]
         },
         {
           "label": "Non-Repeatable Read",
-          "rules": [
+          "whitelist": [
             [ "T1,read1", "T2,write" ],
             [ "T2,write", "T1,read2" ]
           ]
         },
         {
           "label": "Dirty Read",
-          "rules": [
+          "whitelist": [
             [ "T1,write", "T2,read1" ],
             [ "T2,read1", "T1,rollb" ]
           ]
@@ -132,9 +133,17 @@
 
       /**
        * Current constellation of transaction steps.
+       * @private
        * @type {string[]}
        */
       let steps = [];
+
+      /**
+       * Indicates whether both transactions work on different database attributes.
+       * @private
+       * @type {boolean}
+       */
+      let uninfluenced;
 
       /**
        * When the instance is created, when all dependencies have been resolved and before the dependent sub-instances are initialized and ready. Allows dynamic post-configuration of the instance.
@@ -218,7 +227,10 @@
          * Start value for the data attribute ('A') in the database [0] and in transaction T1:a1 [1] and T2:a2 [2].
          * @type {[number,number,number]}
          */
-        const values = [ random( min, max ), 0, 0, random( min, max ), 0, 0 ];
+        const values = [ random( min, max ), 0, 0 ];
+
+        // Can there be a second database attribute? => Set start values.
+        this.random.b && values.push( random( min, max ), 0, 0 );
 
         /**
          * Indicates whether transaction T1 or T2 was rolled back.
@@ -246,34 +258,48 @@
           return !rollback;
         } );
 
+        // Determine if both transactions operate on different database attributes.
+        uninfluenced = !random( 0, this.random.b - 1 );
+
         /**
          * Transformation of the transaction steps into the required data structure for the table.
          * @type {[[number,string,string,number,number|string,number|string,number,number|string,number|string]]}
          */
-        const table = steps.map( ( step, i ) => {
+        let table = steps.map( ( step, i ) => {
 
           let [ t, op ] = step.split( ',' );  // t = Transaction index ([0]: T1, [1]: T2)
           t = parseInt( t[ 1 ] );             // op = Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
-          const b = t === 2 && random( 1, this.random.b );
+          const diff = uninfluenced && t === 2 ? 3 : 0;
 
           // Calculate the attribute values A, a1 and a2 for this transaction step.
           switch ( op ) {
             case 'read1':
-            case 'read2': values[ t ] = values[ 0 ]; break;
-            case 'add_x': values[ t ] += summand[ t - 1 ]; break;
-            case 'write': values[ 0 ] = values[ t ]; values[ t ] = 0; break;
-            case 'rollb': values[ t ] = 0; break;
+            case 'read2': values[ t + diff ] = values[ diff ]; break;
+            case 'add_x': values[ t + diff ] += summand[ t - 1 ]; break;
+            case 'write': values[ diff ] = values[ t + diff ]; values[ t + diff ] = 0; break;
+            case 'rollb': values[ t + diff ] = 0; break;
           }
           op = this.ops[ op ];
-          op = op.replaceAll( '{a}', b ? 'b' : 'a' ).replaceAll( '{A}', t === 2 && random( 1, this.random.b ) ? 'B' : 'A' );
-          op = op.replaceAll( '{x}', summand[ t - 1 ] );
+          op = op.replaceAll( '{a}', diff ? 'b' : 'a' ).replaceAll( '{A}', diff ? 'B' : 'A' );
+          op = op.replaceAll( '{x}', summand[ t - 1 ].toString() );
           return [ i + 1, t === 1 ? op : '', t === 2 ? op : '', ].concat( values.map( value => value || '-' ) );
         } );
 
         // Randomly swap the transaction steps of T1 and T2.
         random( 0, 1 ) && table.forEach( row => [ row[ 1 ], row[ 2 ], row[ 3 ], row[ 4 ], row[ 5 ] ] = [ row[ 2 ], row[ 1 ], row[ 3 ], row[ 5 ], row[ 4 ] ] );
 
-        table.unshift( this.cols.map( col => col.replaceAll( '{A}', b ? 'B' : 'A' ).replaceAll( '{a}', b ? 'b' : 'a' ) ) );
+        // Add column names to the table.
+        table.unshift( this.cols.map( col => col.replaceAll( '{A}', uninfluenced ? 'B' : 'A' ).replaceAll( '{a}', uninfluenced ? 'b' : 'a' ) ) );
+
+        // Put the table columns in the correct order.
+        if ( this.order ) {
+          const tmp = [];
+          table.forEach( ( row, i ) => {
+            tmp.push( [] );
+            row.forEach( ( col, j ) => tmp[ i ][ j ] = row[ this.order[ j ] ] );
+          } );
+          table = tmp;
+        }
 
         // Update main HTML template.
         this.html.render( this.html.main( this, table ), this.element );
@@ -305,11 +331,19 @@
       this.onSubmit = () => {
         const inputs = Object.values( $.formData( this.element ) );
         const solutions = this.topology.slice( 1 ).map( topology => {
-          const order = topology.rules.map( rule => {
+          if ( uninfluenced ) return false;
+          const whitelists = topology.whitelists?.map( list => {
+            const whitelist = list.map( rule => {
+              rule = rule.map( op => steps.indexOf( op ) );
+              return !rule.includes( -1 ) && rule[ 0 ] < rule[ 1 ];
+            } );
+            return !whitelist.includes( false );
+          } );
+          const blacklist = topology.blacklist?.map( rule => {
             rule = rule.map( op => steps.indexOf( op ) );
             return !rule.includes( -1 ) && rule[ 0 ] < rule[ 1 ];
           } );
-          return !order.includes( false );
+          return ( !whitelists || whitelists?.includes( true ) ) && !blacklist?.includes( true );
         } );
         this.html.render( this.html.inputs( this, inputs, solutions ), this.element.querySelector( '#inputs' ) );
       };

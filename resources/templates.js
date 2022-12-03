@@ -19,7 +19,8 @@ export { render };
  * @returns {TemplateResult}
  */
 export function main( app, table ) {
-  const cols = table.shift();
+  const col_heads = table.shift();
+  !app.random.b && col_heads.splice( 6, Infinity );
   return html`
     <header>
       <h1 ?data-hidden=${ !app.title }>${ app.title }</h1>
@@ -29,7 +30,7 @@ export function main( app, table ) {
       <table class="table table-striped table-hover">
         <thead>
           <tr>
-            ${ cols.map( col => html`<th scope="col">${ col }</th>` ) }
+            ${ col_heads.map( col => html`<th scope="col">${ col }</th>` ) }
           </tr>
         </thead>
         <tbody class="table-group-divider">

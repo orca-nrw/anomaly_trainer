@@ -51,21 +51,21 @@ export const config = {
     ],
     {
       "label": "Lost Update",
-      "rules": [
+      "whitelist": [
         [ "T1,read2", "T2,write" ],
         [ "T2,write", "T1,write" ]
       ]
     },
     {
       "label": "Non-Repeatable Read",
-      "rules": [
+      "whitelist": [
         [ "T1,read1", "T2,write" ],
         [ "T2,write", "T1,read2" ]
       ]
     },
     {
       "label": "Dirty Read",
-      "rules": [
+      "whitelist": [
         [ "T1,write", "T2,read1" ],
         [ "T2,read1", "T1,rollb" ]
       ]
@@ -87,7 +87,6 @@ export const lost_update_gen = {
   },
   "t_ops": null,
   "random": {
-    "b": 3,
     "value": [ 10, 80 ],
     "summand": [ 1, 9 ]
   },
@@ -182,7 +181,6 @@ export const dirty_read_gen = {
 export const lost_update_trainer = {
   "title": "\"Lost Update\"-Trainer",
   "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Lost Update\" aufgetreten ist.",
-  "cols": [ "", "T1", "T2", "A", "a1", "", "B", "", "b2" ],
   "ops": {
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
@@ -205,9 +203,15 @@ export const lost_update_trainer = {
     {
       // 'Lost Update' Rules
       "label": "Lost Update",
-      "rules": [
-        [ "T1,read1", "T2,write" ],
-        [ "T2,write", "T1,write" ]
+      "whitelists": [
+        [
+          [ "T1,read1", "T2,write" ],
+          [ "T2,write", "T1,write" ]
+        ],
+        [
+          [ "T2,read1", "T1,write" ],
+          [ "T1,write", "T2,write" ]
+        ]
       ]
     }
   ]
@@ -246,7 +250,7 @@ export const non_repeatable_read_trainer = {
     {
       // 'Non-Repeatable Read' Rules
       "label": "Non-Repeatable Read",
-      "rules": [
+      "whitelist": [
         [ "T1,read1", "T2,write" ],
         [ "T2,write", "T1,read2" ]
       ]
@@ -286,7 +290,7 @@ export const dirty_read_trainer = {
     {
       // 'Dirty Read' Rules
       "label": "Dirty Read",
-      "rules": [
+      "whitelist": [
         [ "T1,write", "T2,read1" ],
         [ "T2,read1", "T1,rollb" ]
       ]
