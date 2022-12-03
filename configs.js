@@ -250,9 +250,11 @@ export const non_repeatable_read_trainer = {
     {
       // 'Non-Repeatable Read' Rules
       "label": "Non-Repeatable Read",
-      "whitelist": [
-        [ "T1,read1", "T2,write" ],
-        [ "T2,write", "T1,read2" ]
+      "whitelists": [
+        [
+          [ "T1,read1", "T2,write" ],
+          [ "T2,write", "T1,read2" ]
+        ]
       ]
     }
   ]
@@ -290,9 +292,11 @@ export const dirty_read_trainer = {
     {
       // 'Dirty Read' Rules
       "label": "Dirty Read",
-      "whitelist": [
-        [ "T1,write", "T2,read1" ],
-        [ "T2,read1", "T1,rollb" ]
+      "whitelists": [
+        [
+          [ "T1,write", "T2,read1" ],
+          [ "T2,read1", "T1,rollb" ]
+        ]
       ]
     }
   ]
