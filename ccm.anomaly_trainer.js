@@ -139,11 +139,11 @@
       let steps = [];
 
       /**
-       * Indicates whether both transactions work on different database attributes.
+       * Indicates whether both transactions work on the same database attribute.
        * @private
        * @type {boolean}
        */
-      let uninfluenced;
+      let influenced;
 
       /**
        * When the instance is created, when all dependencies have been resolved and before the dependent sub-instances are initialized and ready. Allows dynamic post-configuration of the instance.
@@ -258,8 +258,8 @@
           return !rollback;
         } );
 
-        // Determine if both transactions operate on different database attributes.
-        uninfluenced = !random( 0, this.random.b - 1 );
+        // Determine if both transactions operate on the same database attribute.
+        influenced = !this.random.b || random( 0, this.random.b - 1 );
 
         /**
          * Transformation of the transaction steps into the required data structure for the table.
@@ -269,7 +269,7 @@
 
           let [ t, op ] = step.split( ',' );  // t = Transaction index ([0]: T1, [1]: T2)
           t = parseInt( t[ 1 ] );             // op = Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
-          const diff = uninfluenced && t === 2 ? 3 : 0;
+          const diff = !influenced && t === 2 ? 3 : 0;
 
           // Calculate the attribute values A, a1 and a2 for this transaction step.
           switch ( op ) {
@@ -289,7 +289,7 @@
         random( 0, 1 ) && table.forEach( row => [ row[ 1 ], row[ 2 ], row[ 3 ], row[ 4 ], row[ 5 ] ] = [ row[ 2 ], row[ 1 ], row[ 3 ], row[ 5 ], row[ 4 ] ] );
 
         // Add column names to the table.
-        table.unshift( this.cols.map( col => col.replaceAll( '{A}', uninfluenced ? 'B' : 'A' ).replaceAll( '{a}', uninfluenced ? 'b' : 'a' ) ) );
+        table.unshift( this.cols.map( col => col.replaceAll( '{A}', influenced ? 'A' : 'B' ).replaceAll( '{a}', influenced ? 'a' : 'b' ) ) );
 
         // Put the table columns in the correct order.
         if ( this.order ) {
@@ -331,7 +331,7 @@
       this.onSubmit = () => {
         const inputs = Object.values( $.formData( this.element ) );
         const solutions = this.topology.slice( 1 ).map( topology => {
-          if ( uninfluenced ) return false;
+          if ( !influenced ) return false;
           const whitelists = topology.whitelists?.map( list => {
             const whitelist = list.map( rule => {
               rule = rule.map( op => steps.indexOf( op ) );

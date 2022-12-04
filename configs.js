@@ -97,7 +97,7 @@ export const lost_update_gen = {
       [ "T1,add_x", "T1,write" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      // Lost Update Rules
+      // 'Lost Update' Rules
       [ "T1,read1", "T2,write" ],
       [ "T2,write", "T1,write" ]
     ]
@@ -131,7 +131,7 @@ export const non_repeatable_read_gen = {
       // Default Rules
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      // Non-Repeatable-Read Rules
+      // 'Non-Repeatable Read' Rules
       [ "T1,read1", "T2,write" ],
       [ "T2,write", "T1,read2" ],
       [ "T1,read2", "T1,rollb" ]
@@ -167,7 +167,7 @@ export const dirty_read_gen = {
       [ "T1,add_x", "T1,write" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      // Dirty Read Rules
+      // 'Dirty Read' Rules
       [ "T1,write", "T2,read1" ],
       [ "T2,read1", "T1,rollb" ]
     ]
@@ -226,26 +226,25 @@ export const non_repeatable_read_trainer = {
   "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Non-Repeatable Read\" aufgetreten ist.",
   "ops": {
     "read1": "read({A},{a})",
+    "read2": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
-    "write": "write({A},{a})",
-    "read2": "read({A},{a})"
+    "write": "write({A},{a})"
   },
   "t_ops": null,
   "random": {
     "b": 3,
-    "read2": 3,
-    "rollb": 3,
     "value": [ 10, 80 ],
     "summand": [ 1, 9 ]
   },
   "topology": [
     [
       // Default Rules
-      [ "T1,read1", "T1,add_x" ],
+      [ "T1,read1", "T1,read2" ],
+      [ "T1,read2", "T1,add_x" ],
       [ "T1,add_x", "T1,write" ],
-      [ "T2,read1", "T2,add_x" ],
-      [ "T2,add_x", "T2,write" ],
-      [ "T1,read1", "T1,read2" ]
+      [ "T2,read1", "T2,read2" ],
+      [ "T2,read2", "T2,add_x" ],
+      [ "T2,add_x", "T2,write" ]
     ],
     {
       // 'Non-Repeatable Read' Rules
@@ -254,6 +253,10 @@ export const non_repeatable_read_trainer = {
         [
           [ "T1,read1", "T2,write" ],
           [ "T2,write", "T1,read2" ]
+        ],
+        [
+          [ "T2,read1", "T1,write" ],
+          [ "T1,write", "T2,read2" ]
         ]
       ]
     }
