@@ -1,10 +1,10 @@
 /**
  * @overview Default layout of <i>ccmjs</i>-based web component for Anomaly Trainer.
- * @author André Kless <andre.kless@web.de> 2022
+ * @author André Kless <andre.kless@web.de> 2022-2023
  * @license The MIT License (MIT)
  */
 
-header, #inputs, aside {
+header, aside {
   margin: 1em;
 }
 
@@ -14,6 +14,11 @@ header, #inputs, aside {
 
 .label:after {
   content: ':'
+}
+
+#progress {
+  min-width: 300px;
+  height: 32px;
 }
 
 *[data-invisible] {

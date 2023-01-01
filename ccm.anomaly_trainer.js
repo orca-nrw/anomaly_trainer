@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
 /**
  * @overview <i>ccmjs</i>-based web component for Anomaly Trainer.
- * @author André Kless <andre.kless@web.de> 2022
+ * @author André Kless <andre.kless@web.de> 2022-2023
  * @license The MIT License (MIT)
  * @copyright EILD.nrw 2022
  * @version latest (1.0.0)
@@ -35,71 +35,164 @@
       ],
       "helper": [ "ccm.load", { "url": "./libs/ccm/helper.js", "type": "module" } ],
       "html": [ "ccm.load", { "url": "./resources/templates.js", "type": "module" } ],
-//    "logos": "./resources/img/logos/logos.jpg",
-//    "onchange": event => console.log( event ),
-      "onfinish": { "restart": true },
-//    "onready": event => console.log( event ),
-//    "onstart": event => console.log( event ),
+      // "logos": "./resources/img/logos/logos.jpg",
+      // "onchange": event => console.log( event ),
+      "onfinish": { "log": true, "restart": true },
+      // "onready": event => console.log( event ),
+      // "onstart": event => console.log( event ),
       "toposort": [ "ccm.load", { "url": "./libs/toposort/toposort.js#toposort", "type": "module" } ],
 
       // Trainer-specific Configurations
-      "title": "Anomalie-Trainer",
-      "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
       "cols": [ "", "T1", "T2", "A", "a1", "a2", "B", "b1", "b2" ],
-//    "order": [ 0, 1, 4, 7, 3, 6, 5, 8, 2 ],
       "ops": {
+        "read0": "read({A},{a})",
         "read1": "read({A},{a})",
-        "read2": "read({A},{a})",
         "add_x": "{a} = {a} + {x}",
         "write": "write({A},{a})",
         "rollb": "rollback"
       },
-      "t_ops": [
-        [ "read1", "read2", "add_x", "write", "rollb" ],
-        [ "read1", "add_x", "write" ]
+
+      /*
+      "schedules": [
+        {
+          "a": 32,
+          "b": 58,
+          "steps": [ "T1,read1", "T1,add_x", "T2,read1", "T2,add_x", "T2,write", "T1,write" ],
+          "t1": { "attr": "a", "summand": 4 },
+          "t2": { "attr": "a", "summand": 5 },
+          "inputs": [
+            {
+              "label": "Lost Update",
+              "solution": true
+            },
+            {
+              "label": "Non-Repeatable Read",
+              "solution": true
+            },
+            {
+              "label": "Dirty Read",
+              "solution": true
+            }
+          ]
+        }
       ],
+      "schedules2": {
+        "ops": [
+          [ "read0", "read1", "add_x", "write" ], // T1
+          [ "read1", "add_x", "write", "rollb" ]  // T2
+        ],
+        "rules": [
+          [ "T1,read0", "T1,read1" ],
+          [ "T1,read1", "T1,add_x" ],
+          [ "T1,add_x", "T1,write" ],
+          [ "T1,write", "T1,rollb" ],
+          [ "T2,read0", "T2,read1" ],
+          [ "T2,read1", "T2,add_x" ],
+          [ "T2,add_x", "T2,write" ],
+          [ "T2,write", "T2,rollb" ]
+        ],
+        "b": 10,
+        "read0": 50,
+        "rollb": 50,
+        "match": 90,
+        "value": [ 10, 80 ],
+        "summand": [ 1, 9 ],
+        "rounds": 10,
+        "inputs": [
+          {
+            "label": "Lost Update",
+            "solution": [
+              [ "T1,read1", "T2,write" ],
+              [ "T2,write", "T1,write" ]
+            ]
+          },
+          {
+            "label": "Non-Repeatable Read",
+            "solution": [
+              [ "T1,read0", "T2,write" ],
+              [ "T2,write", "T1,read1" ]
+            ]
+          },
+          {
+            "label": "Dirty Read",
+            "solution": [
+              [ "T1,write", "T2,read1" ],
+              [ "T2,read1", "T1,rollb" ]
+            ]
+          }
+        ]
+      },
+       */
+
+      "t_ops": null,
       "random": {
-        "b": 3,
-        "read2": 3,
-        "rollb": 3,
+        "b": 10,
+        "read0": 50,
+        "rollb": 50,
+        "match": 90,
         "value": [ 10, 80 ],
         "summand": [ 1, 9 ]
       },
-      "buttons": {
-        "generate": "Neue Konstellation generieren",
+      "rounds": 10,
+
+      "text": {
+        "title": "Anomalie-Trainer",
+        "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
         "yes": "Ja",
         "neither": "",
         "no": "Nein",
-        "submit": "Abschicken"
+        "submit": "Abschicken",
+        "next": "Nächste",
+        "finish": "Neustart"
       },
       "topology": [
         [
-          [ "T1,read1", "T1,read2" ],
-          [ "T1,read2", "T1,add_x" ],
+          [ "T1,read0", "T1,read1" ],
+          [ "T1,read1", "T1,add_x" ],
           [ "T1,add_x", "T1,write" ],
-          [ "T1,read2", "T1,rollb" ],
+          [ "T1,write", "T1,rollb" ],
+          [ "T2,read0", "T2,read1" ],
           [ "T2,read1", "T2,add_x" ],
-          [ "T2,add_x", "T2,write" ]
+          [ "T2,add_x", "T2,write" ],
+          [ "T2,write", "T2,rollb" ]
         ],
         {
           "label": "Lost Update",
-          "whitelist": [
-            [ "T1,read2", "T2,write" ],
-            [ "T2,write", "T1,write" ]
+          "whitelists": [
+            [
+              [ "T1,read1", "T2,write" ],
+              [ "T2,write", "T1,write" ]
+            ],
+            [
+              [ "T2,read1", "T1,write" ],
+              [ "T1,write", "T2,write" ]
+            ]
           ]
         },
         {
           "label": "Non-Repeatable Read",
-          "whitelist": [
-            [ "T1,read1", "T2,write" ],
-            [ "T2,write", "T1,read2" ]
+          "whitelists": [
+            [
+              [ "T1,read0", "T2,write" ],
+              [ "T2,write", "T1,read1" ]
+            ],
+            [
+              [ "T2,read0", "T1,write" ],
+              [ "T1,write", "T2,read1" ]
+            ]
           ]
         },
         {
           "label": "Dirty Read",
-          "whitelist": [
-            [ "T1,write", "T2,read1" ],
-            [ "T2,read1", "T1,rollb" ]
+          "whitelists": [
+            [
+              [ "T1,write", "T2,read1" ],
+              [ "T2,read1", "T1,rollb" ]
+            ],
+            [
+              [ "T2,write", "T1,read1" ],
+              [ "T1,read1", "T2,rollb" ]
+            ]
           ]
         }
       ]
@@ -118,32 +211,10 @@
       let $;
 
       /**
-       * Already generated unique constellations.
-       * @private
-       * @type {string[]}
+       * App state data
+       * @type {app_state}
        */
-      const constellations = [];
-
-      /**
-       * Number of constellation generation attempts.
-       * @private
-       * @type {number}
-       */
-      let repeats = 0;
-
-      /**
-       * Current constellation of transaction steps.
-       * @private
-       * @type {string[]}
-       */
-      let steps = [];
-
-      /**
-       * Indicates whether both transactions work on the same database attribute.
-       * @private
-       * @type {boolean}
-       */
-      let influenced;
+      let data;
 
       /**
        * When the instance is created, when all dependencies have been resolved and before the dependent sub-instances are initialized and ready. Allows dynamic post-configuration of the instance.
@@ -179,130 +250,18 @@
        */
       this.start = async () => {
 
-        /**
-         * Generates a random number within a range.
-         * @param {number} min - Minimum possible value
-         * @param {number} max - Maximum possible value
-         * @returns {number}
-         */
-        const random = ( min, max ) => Math.floor( Math.random() * ( max - min + 1 ) + min );
+        // Load existing app state data.
+        data = await $.dataset( this.data );
 
-        /**
-         * Summand of transaction T1 and T2.
-         * @type {[number,number]}
-         */
-        const summand = [];
+        // Not exists? => Set initial app state data.
+        if ( !data.sections ) data = {
+          correct: 0,
+          sections: []
+        };
+        if ( this.rounds ) data.total = this.rounds;
 
-        // Calculation of the two different summands.
-        do {
-          const [ min, max ] = this.random.summand;
-          summand[ 0 ] = random( min, max );
-          summand[ 1 ] = random( min, max );
-        } while ( summand[ 0 ] === summand[ 1 ] );
-
-        // Reset current constellation of transaction steps.
-        steps.length = 0;
-
-        // Generate list of all transaction steps.
-        for ( let i = 1; i <= 2; i++ )
-          ( this.t_ops ? this.t_ops[ i - 1 ] : Object.keys( this.ops ) ).forEach( op => steps.push( 'T' + i + ',' + op ) );
-
-        // Put the transaction steps in a valid order using topological sorting.
-        steps = this.toposort( $.shuffleArray( steps ), this.topology[ 0 ] );
-
-        // Generate a different constellation of valid transaction steps each time.
-        if ( constellations.includes( steps.toString() ) ) {
-          if ( ++repeats >= 100 ) { repeats = 0; constellations.length = 0; }
-          return this.start();
-        }
-        constellations.push( steps.toString() );
-
-        /**
-         * Range of possible start values for a data attribute.
-         * @type {[number,number]}
-         */
-        const [ min, max ] = this.random.value;
-
-        /**
-         * Start value for the data attribute ('A') in the database [0] and in transaction T1:a1 [1] and T2:a2 [2].
-         * @type {[number,number,number]}
-         */
-        const values = [ random( min, max ), 0, 0 ];
-
-        // Can there be a second database attribute? => Set start values.
-        this.random.b && values.push( random( min, max ), 0, 0 );
-
-        /**
-         * Indicates whether transaction T1 or T2 was rolled back.
-         * @type {[boolean,boolean]}
-         */
-        const rollbacks = [ false, false ];
-
-        // Removal of not needed transaction steps.
-        steps = steps.filter( step => {
-
-          let [ t, op ] = step.split( ',' );  // t = Transaction index ([0]: T1, [1]: T2)
-          t = t[ 1 ] - 1;                     // op = Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
-          const rollback = rollbacks[ t ];    // rollback = Transaction is rolled back.
-
-          // There is only a certain probability of a second read operation.
-          if ( op === 'read2' && this.random?.read2 && random( 0, this.random.read2 - 1 ) ) return false;
-
-          // There is only a certain probability of a rollback operation.
-          if ( op === 'rollb' ) {
-            if ( this.random?.rollb && random( 0, this.random.rollb - 1 ) ) return false;
-
-            // All transaction steps after a rollback are removed.
-            rollbacks[ t ] = true;
-          }
-          return !rollback;
-        } );
-
-        // Determine if both transactions operate on the same database attribute.
-        influenced = !this.random.b || random( 0, this.random.b - 1 );
-
-        /**
-         * Transformation of the transaction steps into the required data structure for the table.
-         * @type {[[number,string,string,number,number|string,number|string,number,number|string,number|string]]}
-         */
-        let table = steps.map( ( step, i ) => {
-
-          let [ t, op ] = step.split( ',' );  // t = Transaction index ([0]: T1, [1]: T2)
-          t = parseInt( t[ 1 ] );             // op = Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
-          const diff = !influenced && t === 2 ? 3 : 0;
-
-          // Calculate the attribute values A, a1 and a2 for this transaction step.
-          switch ( op ) {
-            case 'read1':
-            case 'read2': values[ t + diff ] = values[ diff ]; break;
-            case 'add_x': values[ t + diff ] += summand[ t - 1 ]; break;
-            case 'write': values[ diff ] = values[ t + diff ]; values[ t + diff ] = 0; break;
-            case 'rollb': values[ t + diff ] = 0; break;
-          }
-          op = this.ops[ op ];
-          op = op.replaceAll( '{a}', diff ? 'b' : 'a' ).replaceAll( '{A}', diff ? 'B' : 'A' );
-          op = op.replaceAll( '{x}', summand[ t - 1 ].toString() );
-          return [ i + 1, t === 1 ? op : '', t === 2 ? op : '', ].concat( values.map( value => value || '-' ) );
-        } );
-
-        // Randomly swap the transaction steps of T1 and T2.
-        random( 0, 1 ) && table.forEach( row => [ row[ 1 ], row[ 2 ], row[ 3 ], row[ 4 ], row[ 5 ] ] = [ row[ 2 ], row[ 1 ], row[ 3 ], row[ 5 ], row[ 4 ] ] );
-
-        // Add column names to the table.
-        table.unshift( this.cols.map( col => col.replaceAll( '{A}', influenced ? 'A' : 'B' ).replaceAll( '{a}', influenced ? 'a' : 'b' ) ) );
-
-        // Put the table columns in the correct order.
-        if ( this.order ) {
-          const tmp = [];
-          table.forEach( ( row, i ) => {
-            tmp.push( [] );
-            row.forEach( ( col, j ) => tmp[ i ][ j ] = row[ this.order[ j ] ] );
-          } );
-          table = tmp;
-        }
-
-        // Update main HTML template.
-        this.html.render( this.html.main( this, table ), this.element );
+        // Show the first section with a constellation of transaction steps.
+        this.next();
 
         // Trigger 'start' event.
         this.onstart && await this.onstart( { instance: this } );
@@ -310,43 +269,296 @@
       };
 
       /**
-       * When the button to generate a new constellation of transaction steps is clicked.
+       * Shows the next section with another constellation of transaction steps.
        * @readonly
        * @function
        */
-      this.onGenerate = () => this.start().then( () => this.html.render( this.html.inputs( this ), this.element.querySelector( '#inputs' ) ) );
+      this.next = () => {
 
-      /**
-       * When an answer is clicked.
-       * @readonly
-       * @function
-       */
-      this.onAnswer = () => this.html.render( this.html.inputs( this, Object.values( $.formData( this.element ) ) ), this.element.querySelector( '#inputs' ) );
+        /**
+         * Initial app state data for the section.
+         * @type {{a: number, b: number, steps: string[], t1: {summand: number, attr: string}, t2: {summand: number, attr: string}}}
+         */
+        const section = {
+          a: random( ...this.random.value ),
+          b: random( ...this.random.value ),
+          steps: [],
+          t1: {
+            attr: ( this.random?.b || 0 ) <= Math.random() * 100 ? 'a' : 'b',
+            summand: 0
+          },
+          t2: {
+            attr: ( this.random?.b || 0 ) <= Math.random() * 100 ? 'a' : 'b',
+            summand: 0
+          }
+        };
 
-      /**
-       * When the button to submit a solution is clicked.
-       * @readonly
-       * @function
-       */
-      this.onSubmit = () => {
-        const inputs = Object.values( $.formData( this.element ) );
-        const solutions = this.topology.slice( 1 ).map( topology => {
-          if ( !influenced ) return false;
-          const whitelists = topology.whitelists?.map( list => {
-            const whitelist = list.map( rule => {
-              rule = rule.map( op => steps.indexOf( op ) );
-              return !rule.includes( -1 ) && rule[ 0 ] < rule[ 1 ];
-            } );
-            return !whitelist.includes( false );
+        // Calculation of two different summands.
+        do {
+          section.t1.summand = random( ...this.random.summand );
+          section.t2.summand = random( ...this.random.summand );
+        } while ( section.t1.summand === section.t2.summand );
+
+        // Generate list of all transaction steps.
+        const steps = [];
+        for ( let i = 1; i <= 2; i++ )
+          ( this.t_ops ? this.t_ops[ i - 1 ] : Object.keys( this.ops ) ).forEach( op => steps.push( 'T' + i + ',' + op ) );
+
+        /**
+         * Previously generated constellations of valid transaction steps.
+         * @type {string[][]}
+         */
+        const constellations = data.sections.map( section => section.steps.toString() );
+
+        // Generate a new constellation of valid transaction steps.
+        let repeats = 0;                                                     // Previous number of attempts to find a new constellation.
+        const anomaly = ( this.random?.match || 0 ) > Math.random() * 100;   // Indicates whether at least one anomaly must be included.
+        do {
+
+          // Shuffle list of all transaction steps and put them in a valid order using topological sorting.
+          section.steps = this.toposort( $.shuffleArray( steps ), this.topology[ 0 ] );
+
+          /**
+           * Indicates whether transaction T1 ([0]) or T2 ([1]) was rolled back.
+           * @type {[boolean,boolean]}
+           */
+          const rollbacks = [ false, false ];
+
+          // Removal of not needed transaction steps.
+          section.steps = section.steps.filter( step => {
+
+            let [ t, op ] = step.split( ',' );  // op: Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
+            t = parseInt( t[ 1 ] ) - 1;         // t = Transaction index ([0]: T1, [1]: T2)
+            const rollback = rollbacks[ t ];    // rollback: Transaction is rolled back.
+
+            // There is only a certain probability of a second read operation.
+            if ( op === 'read2' && ( this.random?.read2 || 0 ) <= Math.random() * 100 ) return false;
+
+            // There is only a certain probability of a rollback operation.
+            if ( op === 'rollb' ) {
+              if ( this.random?.rollb <= Math.random() * 100 ) return false;
+
+              // All transaction steps after a rollback are removed.
+              rollbacks[ t ] = true;
+            }
+            return !rollback;
           } );
-          const blacklist = topology.blacklist?.map( rule => {
-            rule = rule.map( op => steps.indexOf( op ) );
+        } while ( ( constellations.includes( section.steps.toString() ) || this.topology.length > 1 && !solution( section ).includes( true ) && anomaly ) && ++repeats <= 500 );
+        if ( repeats > 500 && this.topology.length === 1 ) return this.start();
+
+        // Add section data to app state data.
+        data.sections.push( section );
+
+        // Update main HTML template.
+        this.html.render( this.html.main( this, this.section2table( section ) ), this.element );
+        this.html.render( this.html.inputs( this ), this.element.querySelector( '#inputs' ) );
+
+        // Trigger the 'change' event due to the start of the next section.
+        this.onchange && this.onchange( { event: 'next', instance: this } );
+
+      };
+
+      /**
+       * Converts the app state data of a section to table values.
+       * @readonly
+       * @function
+       * @param {object} section - App state data of a section.
+       * @returns {[[number,string,string,number,number|string,number|string,number,number|string,number|string]]} - Table values
+       */
+      this.section2table = section => {
+
+        /**
+         * Transactions data
+         * @type {{t1: {nr: number, a: number, b: number, summand: number}, t2: {nr: number, a: number, b: number, summand: number}}}
+         */
+        const data = {
+          t1: { nr: 1, a: 0, b: 0, summand: section.t1.summand },
+          t2: { nr: 2, a: 0, b: 0, summand: section.t2.summand }
+        };
+
+        /**
+         * Table values
+         * @type {[[number,string,string,number,number|string,number|string,number,number|string,number|string]]}
+         */
+        const values = section.steps.map( ( step, i ) => {
+
+          let [ tn, op ] = step.split( ',' );  // op: Transaction operation index ('read1', 'add_x', 'write', 'read2' or 'rollb')
+          tn = tn.toLowerCase();               // tn: Transaction index ('t1' or 't2')
+          const t = data[ tn ];                // t: Data of the active transaction
+          const attr = section[ tn ].attr;     // attr: Database attribute on which the transaction works ('a' or 'b').
+
+          // Calculate the attribute values for this transaction step.
+          switch ( op ) {
+            case 'read1':
+            case 'read2': t[ attr ] = section[ attr ]; break;
+            case 'add_x': t[ attr ] += t.summand; t.added = true; break;
+            case 'write': section[ attr ] = t[ attr ]; t[ attr ] = 0; break;
+            case 'rollb': if ( t.added ) section[ attr ] -= t.summand; t[ attr ] = 0; break;
+          }
+
+          // Replace placeholder for database attributes.
+          op = this.ops[ op ];
+          op = op.replaceAll( '{a}', attr ).replaceAll( '{A}', attr.toUpperCase() );
+          op = op.replaceAll( '{x}', t.summand.toString() );
+
+          // Compilation of the values for this table row.
+          return [ i + 1, t.nr === 1 ? op : '', t.nr === 2 ? op : '', section.a, data.t1.a || '-', data.t2.a || '-', section.b, data.t1.b || '-', data.t2.b || '-' ];
+        } );
+
+        // Randomly swap the transaction steps of T1 and T2.
+        this.t_ops && random( 0, 1 ) && values.forEach( row => [ row[ 1 ], row[ 2 ], row[ 3 ], row[ 4 ], row[ 5 ], row[ 6 ], row[ 7 ], row[ 8 ] ] = [ row[ 2 ], row[ 1 ], row[ 3 ], row[ 5 ], row[ 4 ], row[ 6 ], row[ 8 ], row[ 7 ] ] );
+
+        // Add column names to the table.
+        values.unshift( this.cols );
+
+        // No second database attribute? => Remove corresponding columns.
+        !this.random.b && values.forEach( row => row.length = 6 );
+
+        return values;
+      };
+
+      /**
+       * Returns the current app state.
+       * @readonly
+       * @function
+       * @returns {app_state} A deep copy of the app state data.
+       */
+      this.getValue = () => $.clone( data );
+
+      /**
+       * Contains all event handlers.
+       * @namespace AppEvents
+       * @readonly
+       * @type {Object.<string,function>}
+       */
+      this.events = {
+
+        /**
+         * When an answer is clicked.
+         * @function
+         * @memberOf AppEvents
+         */
+        onAnswer: () => {
+
+          /**
+           * App state data of the current section.
+           * @type {object}
+           */
+          const section = data.sections.at( -1 );
+
+          // Cancel if the app is not a trainer but only a generator or if the solution has already been revealed.
+          if ( this.topology.length === 1 || section.solution ) return;
+
+          // Update the user's input in the current section's app status data.
+          section.input = Object.values( $.formData( this.element ) );
+
+          // Update the HTML template for the input fields.
+          this.html.render( this.html.inputs( this, section ), this.element.querySelector( '#inputs' ) )
+
+          // Trigger the 'change' event due to user has chosen an answer.
+          this.onchange && this.onchange( { event: 'answer', instance: this } );
+
+        },
+
+        /**
+         * When the button to submit a solution is clicked.
+         * @function
+         * @memberOf AppEvents
+         */
+        onSubmit: () => {
+
+          /**
+           * App state data of the current section.
+           * @type {object}
+           */
+          const section = data.sections.at( -1 );
+
+          // Cancel if the app is not a trainer but only a generator or if the solution has already been revealed or user input is still missing.
+          if ( this.topology.length === 1 || section.solution || !section.input || section.input.includes( '' ) ) return;
+
+          // Determine the correct answer and add it in the app state data of the current section.
+          section.solution = solution( section );
+
+          // In the current section's app status data, add whether the user input matches the solution.
+          section.points = 0; section.total = section.solution.length;
+          for ( let i = 0; i < section.total; i++ )
+            section.input[ i ] === section.solution[ i ] && section.points++;
+          section.correct = section.points === section.total;
+          section.correct && data.correct++;
+
+          // Update the HTML template for the input fields.
+          this.html.render( this.html.inputs( this, section ), this.element.querySelector( '#inputs' ) );
+
+          // Trigger the 'change' event due to user input being submitted.
+          this.onchange && this.onchange( { event: 'submit', instance: this } );
+
+        },
+
+        /**
+         * When the button that starts the next phrase is clicked.
+         * @function
+         * @memberOf AppEvents
+         */
+        onNext: () => {
+
+          // Cancel if the app is not a trainer but only a generator and the solution has either not yet been revealed or it is the last round.
+          if ( this.topology.length > 1 && ( this.solution || this.rounds && data.sections.length >= this.rounds ) ) return;
+
+          // Show the next section with another constellation of transaction steps.
+          this.next();
+
+          // Update the HTML template for the input fields.
+          this.html.render( this.html.inputs( this ), this.element.querySelector( '#inputs' ) );
+
+        },
+
+        /**
+         * When the finish button is clicked.
+         * @function
+         * @memberOf AppEvents
+         */
+        onFinish: () => {
+
+          // Cancel if the app is not a trainer but only a generator and the solution has either not yet been revealed or it is not the last round.
+          if ( this.topology.length === 1 || !this.rounds || data.sections.length < this.rounds || !data.sections.at( -1 ).solution ) return;
+
+          // Trigger the 'finish' event.
+          $.onFinish( this );
+
+        }
+
+      };
+
+      /**
+       * Generates a random number within a range.
+       * @private
+       * @function
+       * @param {number} min - Minimum possible value
+       * @param {number} max - Maximum possible value
+       * @returns {number}
+       */
+      const random = ( min, max ) => Math.floor( Math.random() * ( max - min + 1 ) + min );
+
+      /**
+       * Determines the correct solution of a section.
+       * @param {object} section - App state data of a section
+       * @returns {boolean[]}
+       */
+      const solution = section => this.topology.slice( 1 ).map( topology => {
+        if ( section.t1.attr !== section.t2.attr ) return false;
+        const whitelists = topology.whitelists?.map( list => {
+          const whitelist = list.map( rule => {
+            rule = rule.map( op => section.steps.indexOf( op ) );
             return !rule.includes( -1 ) && rule[ 0 ] < rule[ 1 ];
           } );
-          return ( !whitelists || whitelists?.includes( true ) ) && !blacklist?.includes( true );
+          return !whitelist.includes( false );
         } );
-        this.html.render( this.html.inputs( this, inputs, solutions ), this.element.querySelector( '#inputs' ) );
-      };
+        const blacklist = topology.blacklist?.map( rule => {
+          rule = rule.map( op => section.steps.indexOf( op ) );
+          return !rule.includes( -1 ) && rule[ 0 ] < rule[ 1 ];
+        } );
+        return ( !whitelists || whitelists?.includes( true ) ) && !blacklist?.includes( true );
+      } );
 
     }
   };
@@ -354,13 +566,52 @@
 } )();
 
 /**
- * App configuration.
+ * App configuration
  * @typedef {object} app_config
  * @prop {array} css - CSS dependencies.
  * @prop {array} helper - Dependency on helper functions.
  * @prop {Object.<string,TemplateResult>} html - HTML template dependencies.
- * @prop {function} [onchange] - When something changes in the app (notation change, show legend, submit, correction, show solution, next phrase).
+ * @prop {string} [logos] - Show image of logos in the bottom of the app.
+ * @prop {function} [onchange] - When something changes in the app (user has chooses an answer, submit of user input, start of next section).
  * @prop {function|object} [onfinish] - When the finish button is clicked. Sets the finish actions.
  * @prop {function} [onready] - Is called once before the first start of the app.
  * @prop {function} [onstart] - When the app has finished starting.
+ * @prop {array} toposort - Dependency to topological sorting algorithm.
+ * @prop {string[]} cols - Labeling of the table columns.
+ * @prop {object} ops - Definition of the database operations possible in a transaction.
+ * @prop {string} [ops.read0] - Pre-read operation
+ * @prop {string} ops.read1 - Read operation
+ * @prop {string} ops.add_x - Arithmetic operation on the read database attribute.
+ * @prop {string} ops.write - Write operation
+ * @prop {string} [ops.rollb] - Rollback of all database operations of the transaction.
+ * @prop {object>} random - Sets random factors in the app.
+ * @prop {number} random.b - Probability that T2 uses a different database attribute (0.100).
+ * @prop {number} random.read0 - Probability that a pre-read operation will occur (0-100).
+ * @prop {number} random.rollb - Probability that a rollback will occur (0-100).
+ * @prop {number} random.match - Probability that an anomaly occurs (0-100).
+ * @prop {[number,number]} random.value - Initial value of a database attribute (random number between min and max).
+ * @prop {[number,number]} random.summand - Summand for the arithmetic operation (random number between min and max).
+ * @prop {object} text - Texts and Labels in the app.
+ * @prop {string} text.title - App title
+ * @prop {string} text.task - Task description
+ * @prop {string} text.yes - Label of the 'Yes'-button
+ * @prop {string} text.neither - Label of the 'Neither'-button
+ * @prop {string} text.no - Label of the 'No'-button
+ * @prop {string} text.submit - Label of the 'Submit'-button
+ * @prop {string} text.next - Label of the 'Next'-button
+ * @prop {string} text.finish - Label of the 'Finish'-button
+ * @prop {(string[][]|{whitelists: string[][][], blacklist: string[][], label: string})[]} topology - Topological sorting rules
+ */
+
+/**
+ * App state data
+ * @typedef {object} app_state
+ * @prop {number} correct - Number of correctly answered sections.
+ * @prop {number} total - Number of sections.
+ * @prop {app_section[]} sections - Data on the individual sections.
+ */
+
+/**
+ * App state data of a section
+ * @typedef {object} app_section
  */
