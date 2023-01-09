@@ -4,7 +4,7 @@
  * @overview <i>ccmjs</i>-based web component for Anomaly Trainer.
  * @author André Kless <andre.kless@web.de> 2022-2023
  * @license The MIT License (MIT)
- * @copyright EILD.nrw 2022
+ * @copyright EILD.nrw 2022-2023
  * @version latest (1.0.0)
  */
 
@@ -36,6 +36,7 @@
       "feedback": true,
       "helper": [ "ccm.load", { "url": "./libs/ccm/helper.js", "type": "module" } ],
       "html": [ "ccm.load", { "url": "./resources/templates.js", "type": "module" } ],
+      "license": true,
       "logos": "./resources/img/logos/logos.jpg",
       // "onchange": event => console.log( event ),
       "onfinish": { "log": true, "restart": true },

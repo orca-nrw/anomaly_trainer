@@ -1,6 +1,7 @@
 /**
  * @overview App configurations of <i>ccmjs</i>-based web component for Anomaly Trainer.
  * @author André Kless <andre.kless@web.de> 2022-2023
+ * @copyright EILD.nrw 2022-2023
  * @license The MIT License (MIT)
  */
 
@@ -51,6 +52,7 @@ export const non_repeatable_read_gen = {
     "Attribute of Transaction 1",
     "Attribute of Transaction 2"
   ],
+  "license": false,                                       // Keine Lizenzinformationen unter der App anzeigen.
   "logos": "./resources/img/logos/apple-touch-icon.png",  // Anderes Logo unter der App darstellen.
   "ops": {
     "read0": "read({A},{a})",   // Vorab-Leseoperation
@@ -86,7 +88,8 @@ export const non_repeatable_read_gen = {
  * @type {app_config}
  */
 export const dirty_read_gen = {
-  "logos": "",  // Keine Logos unter der App darstellen.
+  "license": false,
+  "logos": "",      // Keine Logos unter der App darstellen.
   "ops": {
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
@@ -123,6 +126,7 @@ export const dirty_read_gen = {
  * @type {app_config}
  */
 export const lost_update_trainer = {
+  "license": false,
   "logos": "",
   "ops": {
     "read1": "read({A},{a})",
@@ -165,6 +169,7 @@ export const lost_update_trainer = {
  * @type {app_config}
  */
 export const non_repeatable_read_trainer = {
+  "license": false,
   "logos": "",
   "ops": {
     "read0": "read({A},{a})",
@@ -213,8 +218,9 @@ export const non_repeatable_read_trainer = {
  * @type {app_config}
  */
 export const dirty_read_trainer = {
-  "logos": "",
   "feedback": false,  // Kein visuelles Feedback, ob eine Antwort richtig oder falsch ist.
+  "license": false,
+  "logos": "",
   "ops": {
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
@@ -264,6 +270,7 @@ export const dirty_read_trainer = {
  * @type {app_config}
  */
 export const complete = {
+  "license": false,
   "logos": "",
   "ops": {
     "read0": "read({A},{a})",
