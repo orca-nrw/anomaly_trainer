@@ -10,112 +10,32 @@
  */
 
 /**
- * Basic configuration.
- * @type {app_config}
- */
-export const configx = {
-  "title": "Anomalie-Trainer",  // Titel der oben in der App dargestellt wird. Unter dem Titel ist die Aufgabenbeschreibung (task).
-  "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
-  // "cols": [ "", "T1", "T2", "A", "a1", "a2" ],  // Beschriftung der Tabellenspalten.
-  "ops": {  // Festlegung der bei einer Transaktion möglichen Datenbankoperationen:
-    "read0": "read({A},{a})",    // Vorab-Leseoperation
-    "read1": "read({A},{a})",    // Leseoperation
-    "add_x": "{a} = {a} + {x}",  // Rechenoperation auf dem gelesenen Datenbankattribut.
-    "write": "write({A},{a})",   // Schreiboperation
-    "rollb": "rollback"          // Zurückrollen aller Datenbankoperationen der Transaktion.
-  },
-  "random": {
-    "b": 30,              // Wahrscheinlichkeit mit der T2 ein anderes Datenbankattribut nutzt (0-100).
-    "read0": 30,          // Wahrscheinlichkeit mit der eine Vorab-Leseoperation vorkommt (0-100).
-    "rollb": 30,          // Wahrscheinlichkeit mit der ein Rollback vorkommt (0-100).
-    "match": 50,          // Wahrscheinlichkeit mit der eine Anomalie vorkommt (0-100).
-    "value": [ 10, 80 ],  // Startwert eines Datenbankattributs (Zufallszahl zwischen min und max).
-    "summand": [ 1, 9 ]   // Summand für die Rechenoperation (Zufallszahl zwischen min und max).
-  },
-  "text": {
-    /* Beschriftung der Buttons */
-    "yes": "Ja",
-    "neither": "",
-    "no": "Nein",
-    "submit": "Abschicken",
-    "next": "Nächste",
-    "finish": "Neustart"
-  },
-  "logos": "./resources/img/logos/logos.jpg",  // Logos die unter der App dargestellt werden.
-  "topology": [  // Topologische Sortierungsregeln zur Beeinflussung der Reihenfolge in der...
-    [                     // ...die Datenbankoperationen einer Transaktion auftreten können.
-      // Standardregeln
-      [ "T1,read0", "T1,read1" ],  // Das erste Lesen immer vor dem zweiten Lesen.
-      [ "T1,read1", "T1,add_x" ],  // Erst Lesen, dann Addieren.
-      [ "T1,add_x", "T1,write" ],  // Erst Addieren, dann Schreiben.
-      [ "T1,write", "T1,rollb" ],  // Zurückrollen erst ab dem ersten Lesen möglich.
-      [ "T2,read1", "T2,add_x" ],  // Auch für T2 gilt: erst Lesen, dann Addieren.
-      [ "T2,add_x", "T2,write" ]   // Auch für T2 gilt: erst Addieren, dann Schreiben.
-    ],
-    {
-      "label": "Lost Update",
-      "whitelist": [
-        [
-          [ "T1,read1", "T2,write" ],
-          [ "T2,write", "T1,write" ]
-        ],
-        [
-          [ "T2,read1", "T1,write" ],
-          [ "T1,write", "T2,write" ]
-        ]
-      ]
-    },
-    {
-      "label": "Non-Repeatable Read",
-      "whitelist": [
-        [ "T1,read0", "T2,write" ],
-        [ "T2,write", "T1,read1" ]
-      ]
-    },
-    {
-      "label": "Dirty Read",
-      "whitelist": [
-        [ "T1,write", "T2,read1" ],
-        [ "T2,read1", "T1,rollb" ]
-      ]
-    }
-  ]
-};
-
-/**
  * Configuration to show Lost Update phenomena.
  * @type {app_config}
  */
 export const lost_update_gen = {
-  "ops": {
-    "read1": "read({A},{a})",
-    "add_x": "{a} = {a} + {x}",
-    "write": "write({A},{a})"
+  "ops": {  // Festlegung der bei einer Transaktion möglichen Datenbankoperationen:
+    "read1": "read({A},{a})",    // Leseoperation
+    "add_x": "{a} = {a} + {x}",  // Rechenoperation auf dem gelesenen Datenbankattribut.
+    "write": "write({A},{a})",   // Schreiboperation
   },
-  "t_ops": [
-    [ "read1", "add_x", "write" ],  // T1
-    [ "read1", "add_x", "write" ]   // T2
-  ],
-  "random": {
-    "value": [ 10, 80 ],
-    "summand": [ 1, 9 ]
-  },
-  "rounds": "",
-  "text.title": "\"Lost Update\"-Generator",
-  "text.task": "Beim \"Lost Update\"-Phänomen wird ein Wert, der von einer Transaktion geschrieben wurde von einer anderen Transaktion überschrieben.",
-  "text.next": "Neue Konstellation generieren",
-  "topology": [
-    [
-      // Default Rules
-      [ "T1,read1", "T1,add_x" ],
-      [ "T1,add_x", "T1,write" ],
-      [ "T2,read1", "T2,add_x" ],
-      [ "T2,add_x", "T2,write" ],
-      // 'Lost Update' Rules
+  "schedules": {  // Enthält die Einstellungen zum Generieren eines Schedules.
+    "rules": [    // Regeln für die topologische Sortierung der Transaktionsschritte.
+      // Standardregeln
+      [ "T1,read1", "T1,add_x" ],  // T1: Erst Lesen, dann Addieren.
+      [ "T1,add_x", "T1,write" ],  // T1: Erst Addieren, dann Schreiben.
+      [ "T2,read1", "T2,add_x" ],  // Auch für T2 gilt: erst Lesen, dann Addieren.
+      [ "T2,add_x", "T2,write" ],  // Auch für T2 gilt: erst Addieren, dann Schreiben.
+      // 'Lost Update'-spezifische Regeln
       [ "T1,read1", "T2,write" ],
       [ "T2,write", "T1,write" ]
     ]
-  ]
+  },
+  "text": {  // Texte und Beschriftungen
+    "title": "\"Lost Update\"-Generator",  // Titel der App und Aufgabenstellung
+    "task": "Beim \"Lost Update\"-Phänomen wird ein Wert, der von einer Transaktion geschrieben wurde von einer anderen Transaktion überschrieben.",
+    "next": "Neue Konstellation generieren"  // Beschriftung für den "Weiter"-Button
+  }
 };
 
 /**
@@ -123,39 +43,42 @@ export const lost_update_gen = {
  * @type {app_config}
  */
 export const non_repeatable_read_gen = {
-  "title": "\"Non-Repeatable Read\"-Generator",
-  "task": "Beim \"Non-Repeatable Read\"-Phänomen kann eine Transaktion während ihrer Laufzeit von einem Attribut zu unterschiedlichen Zeitpunkten unterschiedliche Werte lesen, da das Attribut während der Transaktion von einer anderen Transaktion verändert wurde.",
+  "cols": [  // Beschriftung der Tabellenspalten
+    "Step",
+    "Transaction 1",
+    "Transaction 2",
+    "Database Attribute",
+    "Attribute of Transaction 1",
+    "Attribute of Transaction 2"
+  ],
+  "logos": "./resources/img/logos/apple-touch-icon.png",  // Anderes Logo unter der App darstellen.
   "ops": {
-    "read0": "read({A},{a})",
+    "read0": "read({A},{a})",   // Vorab-Leseoperation
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
     "write": "write({A},{a})",
-    "rollb": "rollback"
+    "rollb": "rollback"         // Zurückrollen aller Datenbankoperationen der Transaktion.
   },
-  "t_ops": [
-    [ "read0", "read1", "rollb" ],  // T1
-    [ "read1", "add_x", "write" ]   // T2
-  ],
-  "random": {
-    "read0": 100,
-    "value": [ 10, 80 ],
-    "summand": [ 1, 9 ]
-  },
-  "rounds": "",
-  "text.title": "\"Non-Repeatable Read\"-Generator",
-  "text.task": "Beim \"Non-Repeatable Read\"-Phänomen kann eine Transaktion während ihrer Laufzeit von einem Attribut zu unterschiedlichen Zeitpunkten unterschiedliche Werte lesen, da das Attribut während der Transaktion von einer anderen Transaktion verändert wurde.",
-  "text.next": "Neue Konstellation generieren",
-  "topology": [
-    [
-      // Default Rules
+  "schedules": {
+    "ops": [      // Gibt an, welche Transaktion welche Operationen nutzt.
+      [ "read0", "read1", "rollb" ],  // Transaktion 1 (T1)
+      [ "read1", "add_x", "write" ]   // Transaktion 2 (T2)
+    ],
+    "rules": [
+      // Standardregeln
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      // 'Non-Repeatable Read' Rules
+      // 'Non-Repeatable Read'-spezifische Regeln
       [ "T1,read0", "T2,write" ],
       [ "T2,write", "T1,read1" ],
       [ "T1,read1", "T1,rollb" ]
     ]
-  ]
+  },
+  "text": {
+    "title": "\"Non-Repeatable Read\"-Generator",
+    "task": "Beim \"Non-Repeatable Read\"-Phänomen kann eine Transaktion während ihrer Laufzeit von einem Attribut zu unterschiedlichen Zeitpunkten unterschiedliche Werte lesen, da das Attribut während der Transaktion von einer anderen Transaktion verändert wurde.",
+    "next": "Neue Konstellation generieren"
+  }
 };
 
 /**
@@ -163,37 +86,36 @@ export const non_repeatable_read_gen = {
  * @type {app_config}
  */
 export const dirty_read_gen = {
+  "logos": "",  // Keine Logos unter der App darstellen.
   "ops": {
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
     "write": "write({A},{a})",
     "rollb": "rollback"
   },
-  "t_ops": [
-    [ "read1", "add_x", "write", "rollb" ],  // T1
-    [ "read1", "add_x", "write" ]            // T2
-  ],
-  "random": {
-    "rollb": 100,
-    "value": [ 10, 80 ],
-    "summand": [ 1, 9 ]
-  },
-  "rounds": "",
-  "text.title": "\"Dirty Read\"-Generator",
-  "text.task": "Beim \"Dirty Read\"-Phänomen verändert eine Transaktion einen Wert, welcher von einer anderen Transaktion gelesen wird. Die Transaktion, die das Attribut verändert hat, wird allerdings zurückgesetzt und die andere Transaktion, die den veränderten Wert des Attributs gelesen hat, arbeitet auf einen \"verschmutzten\" Wert.",
-  "text.next": "Neue Konstellation generieren",
-  "topology": [
-    [
-      // Default Rules
+  "value": [ 1, 4 ],    // Startwert eines Datenbankattributs (Zufallszahl zwischen [min, max]).
+  "summand": [ 1, 3 ],  // Summand für die Rechenoperation (Zufallszahl zwischen [min, max]).
+  "schedules": {
+    "ops": [
+      [ "read1", "add_x", "write", "rollb" ],
+      [ "read1", "add_x", "write" ]
+    ],
+    "rules": [
+      // Standardregeln
       [ "T1,read1", "T1,add_x" ],
       [ "T1,add_x", "T1,write" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
-      // 'Dirty Read' Rules
+      // 'Dirty Read'-spezifische Regeln
       [ "T1,write", "T2,read1" ],
       [ "T2,read1", "T1,rollb" ]
     ]
-  ]
+  },
+  "text": {
+    "title": "\"Dirty Read\"-Generator",
+    "task": "Beim \"Dirty Read\"-Phänomen verändert eine Transaktion einen Wert, welcher von einer anderen Transaktion gelesen wird. Die Transaktion, die das Attribut verändert hat, wird allerdings zurückgesetzt und die andere Transaktion, die den veränderten Wert des Attributs gelesen hat, arbeitet auf einen \"verschmutzten\" Wert.",
+    "next": "Neue Konstellation generieren"
+  }
 };
 
 /**
@@ -201,88 +123,89 @@ export const dirty_read_gen = {
  * @type {app_config}
  */
 export const lost_update_trainer = {
+  "logos": "",
   "ops": {
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
     "write": "write({A},{a})"
   },
-  "t_ops": null,
-  "random": {
-    "b": 30,
-    "match": 50,
-    "value": [ 10, 80 ],
-    "summand": [ 1, 9 ]
-  },
-  "text.title": "\"Lost Update\"-Trainer",
-  "text.task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Lost Update\" aufgetreten ist.",
-  "topology": [
-    [
-      // Default Rules
+  "use_b": 30,    // Wahrscheinlichkeit mit der eine Transaktion ein anderes Datenbankattribut (B) nutzt (0-100).
+  "schedules": {
+    "anomaly": 50,  // Wahrscheinlichkeit mit der eine Anomalie auftritt (0-100).
+    "rules": [
+      // Standardregeln
       [ "T1,read1", "T1,add_x" ],
       [ "T1,add_x", "T1,write" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ],
     ],
-    {
-      // 'Lost Update' Rules
-      "label": "Lost Update",
-      "whitelists": [
-        [
-          [ "T1,read1", "T2,write" ],
-          [ "T2,write", "T1,write" ]
-        ],
-        [
-          [ "T2,read1", "T1,write" ],
-          [ "T1,write", "T2,write" ]
-        ]
-      ]
-    }
-  ]
+    "inputs": [  // Enthält die Einstellungen für den [Ja|Nein]-Button.
+      {
+        "label": "Lost Update",        // Beschriftung für den [Ja|Nein]-Button
+        "solution": [                  // Wenn die enthaltenen Regeln für den Schedule erfüllt sind, muss "Ja" ausgewählt werden.
+          [ "T1,read1", "T2,write" ],  // T2 schreibt erst, nachdem T1 gelesen hat.
+          [ "T2,write", "T1,write" ]   // T1 schreibt erst, nachdem T2 geschrieben hat.
+        ]                              // (Dann ist es ein "Lost Update".)
+      }
+    ]
+  },
+  "text": {
+    "title": "\"Lost Update\"-Trainer",
+    "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Lost Update\" aufgetreten ist.",
+    "yes": "Ja",              // Beschriftung für den linken Teil eines [Ja|Nein]-Buttons.
+    "neither": "",            // Beschriftung für den mittleren Teil eines [Ja|Nein]-Buttons.
+    "no": "Nein",             // Beschriftung für den rechten Teil eines [Ja|Nein]-Buttons.
+    "submit": "Abschicken",   // Beschriftung für den Abschicken-Button.
+    "next": "Nächste"
+  }
 };
 
 /**
- * Configuration to train Non-Repeatable-Read phenomena (short version).
+ * Configuration to train Non-Repeatable-Read phenomena.
  * @type {app_config}
  */
 export const non_repeatable_read_trainer = {
+  "logos": "",
   "ops": {
     "read0": "read({A},{a})",
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
     "write": "write({A},{a})"
   },
-  "t_ops": [
-    [ "read0", "read1" ],           // T1
-    [ "read1", "add_x", "write" ]   // T2
-  ],
-  "random": {
-    "b": 10,
-    "read0": 100,
-    "match": 60,
-    "value": [ 10, 80 ],
-    "summand": [ 1, 9 ]
-  },
-  "rounds": 6,
-  "text.title": "\"Non-Repeatable Read\"-Trainer",
-  "text.task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Non-Repeatable Read\" aufgetreten ist.",
-  "topology": [
-    [
-      // Default Rules
+  "use_b": 30,
+  "schedules": {
+    "anomaly": 50,
+    "read0": 80,    // Wahrscheinlichkeit mit der eine Vorab-Leseoperation vorkommt (0-100).
+    "rounds": 6,    // Anzahl der Schedules, die generiert und abgefragt werden.
+    "ops": [
+      [ "read0", "read1" ],
+      [ "read1", "add_x", "write" ]
+    ],
+    "rules": [
       [ "T1,read0", "T1,read1" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ]
     ],
-    {
-      // 'Non-Repeatable Read' Rules
-      "label": "Non-Repeatable Read",
-      "whitelists": [
-        [
+    "inputs": [
+      {
+        "label": "Non-Repeatable Read",
+        "solution": [
           [ "T1,read0", "T2,write" ],
           [ "T2,write", "T1,read1" ]
         ]
-      ]
-    }
-  ]
+      }
+    ]
+  },
+  "text": {
+    "title": "\"Non-Repeatable Read\"-Trainer",
+    "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Non-Repeatable Read\" aufgetreten ist.",
+    "yes": "Ja",
+    "neither": "",
+    "no": "Nein",
+    "submit": "Abschicken",
+    "next": "Nächste",
+    "finish": "Neustart"  // Beschriftung für den Fertig-Button zum Abschließen der App.
+  }
 };
 
 /**
@@ -290,44 +213,195 @@ export const non_repeatable_read_trainer = {
  * @type {app_config}
  */
 export const dirty_read_trainer = {
+  "logos": "",
+  "feedback": false,  // Kein visuelles Feedback, ob eine Antwort richtig oder falsch ist.
   "ops": {
     "read1": "read({A},{a})",
     "add_x": "{a} = {a} + {x}",
     "write": "write({A},{a})",
     "rollb": "rollback"
   },
-  "t_ops": [
-    [ "read1", "add_x", "write", "rollb" ],  // T1
-    [ "read1", "add_x", "write" ]            // T2
-  ],
-  "random": {
-    "b": 30,
-    "rollb": 90,
-    "match": 50,
-    "value": [ 10, 80 ],
-    "summand": [ 1, 9 ]
-  },
-  "rounds": 6,
-  "text.title": "\"Dirty Read\"-Trainer",
-  "text.task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Dirty Read\" aufgetreten ist.",
-  "topology": [
-    [
-      // Default Rules
+  "use_b": 30,
+  "schedules": {
+    "anomaly": 50,
+    "rollb": 80,    // Wahrscheinlichkeit mit der ein Rollback vorkommt (0-100).
+    "rounds": 6,
+    "ops": [
+      [ "read1", "add_x", "write", "rollb" ],
+      [ "read1", "add_x", "write" ]
+    ],
+    "rules": [
       [ "T1,read1", "T1,add_x" ],
       [ "T1,add_x", "T1,write" ],
       [ "T1,write", "T1,rollb" ],
       [ "T2,read1", "T2,add_x" ],
       [ "T2,add_x", "T2,write" ]
     ],
-    {
-      // 'Dirty Read' Rules
-      "label": "Dirty Read",
-      "whitelists": [
-        [
+    "inputs": [
+      {
+        "label": "Dirty Read",
+        "solution": [
           [ "T1,write", "T2,read1" ],
           [ "T2,read1", "T1,rollb" ]
         ]
+      }
+    ]
+  },
+  "text": {
+    "title": "\"Dirty Read\"-Trainer",
+    "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen ein \"Dirty Read\" aufgetreten ist.",
+    "yes": "Ja",
+    "neither": "",
+    "no": "Nein",
+    "submit": "Abschicken",
+    "next": "Nächste",
+    "finish": "Neustart"
+  }
+};
+
+/**
+ * Configuration to train all three types of anomaly phenomena.
+ * @type {app_config}
+ */
+export const complete = {
+  "logos": "",
+  "ops": {
+    "read0": "read({A},{a})",
+    "read1": "read({A},{a})",
+    "add_x": "{a} = {a} + {x}",
+    "write": "write({A},{a})",
+    "rollb": "rollback"
+  },
+  "schedules": {
+    "ops": [
+      [ "read0", "read1", "add_x", "write", "rollb" ],
+      [ "read1", "add_x", "write" ]
+    ],
+    "rules": [
+      [ "T1,read0", "T1,read1" ],
+      [ "T1,read1", "T1,add_x" ],
+      [ "T1,add_x", "T1,write" ],
+      [ "T1,write", "T1,rollb" ],
+      [ "T2,read1", "T2,add_x" ],
+      [ "T2,add_x", "T2,write" ],
+      [ "T2,write", "T1,rollb" ]
+    ],
+    "anomaly": 90,
+    "read0": 90,
+    "rollb": 90,
+    "rounds": 10,
+    "inputs": [    // Hier gibt es nun mehrere [Ja|Nein]-Buttons
+      {
+        "label": "Lost Update",
+        "solution": [
+          [ "T1,read1", "T2,write" ],
+          [ "T2,write", "T1,write" ]
+        ]
+      },
+      {
+        "label": "Non-Repeatable Read",
+        "solution": [
+          [ "T1,read0", "T2,write" ],
+          [ "T2,write", "T1,read1" ]
+        ]
+      },
+      {
+        "label": "Dirty Read",
+        "solution": [
+          [ "T1,write", "T2,read1" ],
+          [ "T2,read1", "T1,rollb" ]
+        ]
+      }
+    ]
+  },
+  "text": {
+    "title": "Anomalie-Trainer",
+    "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
+    "yes": "Ja",
+    "neither": "",
+    "no": "Nein",
+    "submit": "Abschicken",
+    "next": "Nächste",
+    "finish": "Neustart"
+  }
+};
+
+/**
+ * Configuration to train all three types of anomaly phenomena with specific schedules.
+ * @type {app_config}
+ */
+export const specific = {
+  "ops": {
+    "read0": "read({A},{a})",
+    "read1": "read({A},{a})",
+    "add_x": "{a} = {a} + {x}",
+    "write": "write({A},{a})",
+    "rollb": "rollback"
+  },
+  "use_b": 100,
+  "schedules": [  // Hier gibt es nun mehrere fest vordefinierte Schedules.
+    {
+      "a": 32,
+      "b": 58,
+      "steps": [ "T1,read1", "T2,read0", "T1,add_x", "T1,write", "T2,read1", "T2,add_x", "T2,write" ],
+      "t1": { "attr": "a", "summand": 4 },
+      "t2": { "attr": "a", "summand": 7 },
+      "inputs": [
+        {
+          "label": "Lost Update",
+          "solution": false
+        },
+        {
+          "label": "Non-Repeatable Read",
+          "solution": true
+        }
+      ]
+    },
+    {  // Hier wird einmalig ein "Lost Update" generiert, also keine [Ja|Nein]-Buttons.
+      "ops": [
+        [ "read1", "add_x", "write" ],
+        [ "read1", "add_x", "write" ]
+      ],
+      "rules": [
+        // Standardregeln
+        [ "T1,read1", "T1,add_x" ],
+        [ "T1,add_x", "T1,write" ],
+        [ "T2,read1", "T2,add_x" ],
+        [ "T2,add_x", "T2,write" ],
+        // 'Lost Update'-spezifische Regeln
+        [ "T1,read1", "T2,write" ],
+        [ "T2,write", "T1,write" ]
+      ]
+    },
+    {
+      // (Startwerte für Datenbankattribute werden diesmal zufällig bestimmt.)
+      "steps": [ "T1,read0", "T2,read1", "T2,add_x", "T1,read1", "T2,write", "T1,add_x", "T1,write", "T2,rollb" ],
+      "t1": { "attr": "b" },  // (Summand für Rechenoperation wird zufällig bestimmt.)
+      "t2": { "attr": "b" },  // (Summand für Rechenoperation wird zufällig bestimmt.)
+      "inputs": [
+        {
+          "label": "Lost Update",
+          "solution": true
+        },
+        {
+          "label": "Non-Repeatable Read",
+          "solution": false
+        },
+        {
+          "label": "Dirty Read",
+          "solution": true
+        }
       ]
     }
-  ]
+  ],
+  "text": {
+    "title": "Anomalie-Trainer mit spezifischen Schedules",
+    "task": "Prüfen Sie, ob während der folgenden beiden Datenbank-Transaktionen eine Anomalie aufgetreten ist.",
+    "yes": "Ja",
+    "neither": "",
+    "no": "Nein",
+    "submit": "Abschicken",
+    "next": "Nächste",
+    "finish": "Neustart"
+  }
 };
