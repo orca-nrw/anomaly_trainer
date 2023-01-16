@@ -36,8 +36,6 @@
       "feedback": true,
       "helper": [ "ccm.load", { "url": "./libs/ccm/helper.js", "type": "module" } ],
       "html": [ "ccm.load", { "url": "./resources/templates.js", "type": "module" } ],
-      "license": true,
-      "logos": "./resources/img/logos/logos.jpg",
       // "onchange": event => console.log( event ),
       "onfinish": { "log": true, "restart": true },
       // "onready": event => console.log( event ),
@@ -527,7 +525,6 @@
  * @prop {array} css - CSS dependencies.
  * @prop {array} helper - Dependency on helper functions.
  * @prop {Object.<string,TemplateResult>} html - HTML template dependencies.
- * @prop {string} [logos] - Show image of logos in the bottom of the app.
  * @prop {function} [onchange] - When something changes in the app (user has chooses an answer, submit of user input, start of next section).
  * @prop {function|object} [onfinish] - When the finish button is clicked. Sets the finish actions.
  * @prop {function} [onready] - Is called once before the first start of the app.

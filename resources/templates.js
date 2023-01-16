@@ -46,24 +46,20 @@ export function main( app, values ) {
     </main>
     
     <!-- Lizenzen -->
-    ${ app.license ? html`
-      <aside class="bg-light rounded text-center form-text mt-4 mx-3">
-        Der <a href="https://github.com/EILD-nrw/anomaly_trainer" target="_blank">Anomalie-Trainer</a> wurde
-        von <a href="https://h-brs.de/de/inf/andre-kless" target="_blank">André Kless</a> im Rahmen
-        des <a href="https://github.com/EILD-nrw" target="_blank">EILD-Projekts</a> an
-        der <a href="https://h-brs.de" target="_blank">Hochschule Bonn-Rhein-Sieg</a> entwickelt.
-        Dieser interaktive Trainer enthält Software unter <a href="https://opensource.org/licenses/MIT" target="_blank">MIT-Lizenz</a> und Content
-        unter der <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.de" target="_blank">CC0-Lizenz</a>.
-      </aside>
-    ` : '' }
+    <aside class="bg-light rounded text-center form-text mt-4 mx-3">
+      Der <a href="https://github.com/EILD-nrw/anomaly_trainer" target="_blank">Anomalie-Trainer</a> wurde
+      von <a href="https://h-brs.de/de/inf/andre-kless" target="_blank">André Kless</a> im Rahmen
+      des <a href="https://github.com/EILD-nrw" target="_blank">EILD-Projekts</a> an
+      der <a href="https://h-brs.de" target="_blank">Hochschule Bonn-Rhein-Sieg</a> entwickelt.
+      Dieser interaktive Trainer enthält Software unter <a href="https://opensource.org/licenses/MIT" target="_blank">MIT-Lizenz</a> und Content
+      unter der <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.de" target="_blank">CC0-Lizenz</a>.
+    </aside>
 
     <!-- Logos -->
-    ${ app.logos ? html`
-      <aside class="mt-5 text-center">
-        <hr>
-        <img src="${ app.logos }" alt="Logos">
-      </aside>
-    ` : '' }
+    <aside class="mt-5 text-center">
+      <hr>
+      <img src="./resources/img/logos/logos.jpg" alt="Logos">
+    </aside>
   `;
 }
 
