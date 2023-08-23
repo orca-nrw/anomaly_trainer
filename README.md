@@ -38,7 +38,7 @@ des [EILD-Projekts](https://eild.nrw) an
 der [Hochschule Bonn-Rhein-Sieg](https://h-brs.de) entwickelt.
 Dieses Repository enthält Software unter [MIT-Lizenz](/LICENSE) und Content
 unter [CC0-Lizenz](https://creativecommons.org/publicdomain/zero/1.0/deed.de).
-Content sind insbesondere die Phrasen in der Basiskonfiguration, ausgenommen sind die verwendeten Logos.
+Content ist insbesondere der Titel und die Aufgabenbeschreibung in der Basiskonfiguration, ausgenommen sind die verwendeten Logos.
 
 ## Kontakt
 Wir freuen uns über jedes Feedback und beantworten gern Ihre Fragen.
