@@ -33,7 +33,7 @@ Es handelt sich um reine Selbsttests mit direktem Feedback, was richtig/falsch b
 Es existieren keine Abhängigkeiten zu externen Servern und es findet entsprechend kein Datenaustausch mit anderen Servern statt.
 
 ## Code-Dokumentation
-Eine aus den Dokumentationskommentaren generierte Code-Dokumentation für Entwickler findet sich unter https://eild-nrw.github.io/anomaly_trainer/docs/.
+Eine aus den Dokumentationskommentaren generierte Code-Dokumentation für Entwickler findet sich unter https://orca-nrw.github.io/anomaly_trainer/docs/.
 
 Der `libs`-Ordner enthält wiederverwendete Webkomponenten, Bibliotheken und Frameworks.
 
