@@ -4,10 +4,10 @@
 Der Anomalie-Trainer trainiert die Datenbank-Anomalien "Lost Update", "Non-Repeatable-Read" und "Dirty Read".
 
 ## Systemanforderungen
-Voraussetzung für die App ist ein gängiger Webbrowser (Firefox, Google Chrome, Microsoft Edge, Opera, Safari) mit aktiviertem JavaScript in einer aktuellen Version.
+Voraussetzung für die App ist ein gängiger Webbrowser (z.B. Firefox, Google Chrome, Microsoft Edge, Opera, Safari) mit aktiviertem JavaScript in einer aktuellen Version.
 
 ## Installation
-Die Webanwendung kann über GitHub Pages in ihrer Basiskonfiguration ohne Installation über die folgende Web-URL direkt genutzt werden: https://eild-nrw.github.io/anomaly_trainer/.
+Die Webanwendung kann über GitHub Pages in ihrer Basiskonfiguration ohne Installation über die folgende Web-URL direkt genutzt werden: https://orca-nrw.github.io/anomaly_trainer/.
 Über die Web-URL ist die Webanwendung immer auf dem neusten Stand und muss nicht von Hand aktualisiert werden.
 Wird die Web-URL auf einem mobilen Gerät (Smartphone, Tablet) aufgerufen, kann die App von dort aus auf den Homescreen gelegt und anschließend wie eine native Mobile App genutzt werden.
 
@@ -22,8 +22,8 @@ In einer Lernplattform (z.B. ILIAS oder Moodle) kann die App entweder über die 
 
 ## Anpassbarkeit
 Durch das Editieren der im Repository enthaltenen `configs.js` können weitreichende individuelle Anpassungen vorgenommen werden.
-Layout und Design können über die `resources/styles.css` angepasst werden. Die `resources/templates.js` enthält die HTML-Templates,
-in der bei Bedarf weitere HTML-ID's und HTML-Klassen ergänzt werden können, um das Selektieren von HTML-Elementen im CSS zu erleichtern.
+Layout und Design können über die `resources/styles.css` angepasst werden.
+Die `resources/templates.js` enthält die HTML-Templates, in der bei Bedarf weitere HTML-ID's und HTML-Klassen ergänzt werden können, um das Selektieren von HTML-Elementen im CSS zu erleichtern.
 Wer über die nötigen Programmierkenntnisse verfügt, kann auch die Logik des interaktiven Trainers in der `ccm.anomaly_trainer.js` anpassen.
 Es handelt sich dabei um eine auf der _ccmjs_-Webtechnologie basierende Webkomponente.
 
@@ -40,14 +40,13 @@ Der `libs`-Ordner enthält wiederverwendete Webkomponenten, Bibliotheken und Fra
 Der `versions`-Ordner enthält alles was nötig ist, um auch ältere Versionen weiter lauffähig zu halten und um die Anwendung auch in anderen Webseiten (mit absoluten statt relativen Pfaden) flexibel einsetzen zu können.
 
 ## Lizenzen
-Dieses Repository enthält Software und Content.
-Bei der Software handelt es sich um freie Software unter der [MIT-Lizenz](/LICENSE).
-Beim Content handelt es sich um gemeinfreie Inhalte unter der [CC0-Lizenz](https://creativecommons.org/publicdomain/zero/1.0/deed.de).
-Content ist insbesondere der Titel und die Aufgabenbeschreibung in der Basiskonfiguration.
-
-## Hintergrundinformationen
-Der Anomalie-Trainer wurde an der Hochschule Bonn-Rhein-Sieg im Rahmen des [EILD-Projekts](https://github.com/EILD-nrw) von André Kless
-auf Basis der Webstandards HTML, CSS und JavaScript in Form einer _ccmjs_-basierten Webkomponente entwickelt.
+Der [Anomalie-Trainer](https://github.com/orca-nrw/anomaly_trainer) wurde
+von [André Kless](https://h-brs.de/de/inf/andre-kless) im Rahmen
+des [EILD-Projekts](https://medien.hs-duesseldorf.de/eild) an
+der [Hochschule Bonn-Rhein-Sieg](https://h-brs.de) entwickelt.
+Dieses Repository enthält Software unter [MIT-Lizenz](/LICENSE) und Content
+unter [CC0-Lizenz](https://creativecommons.org/publicdomain/zero/1.0/deed.de).
+Content sind insbesondere die Phrasen in der Basiskonfiguration, ausgenommen sind die verwendeten Logos.
 
 ## Kontakt
 Wir freuen uns über jedes Feedback und beantworten gern Ihre Fragen.
