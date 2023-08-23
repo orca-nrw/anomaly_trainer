@@ -31,13 +31,6 @@ In der unveränderten Basiskonfiguration werden an keiner Stelle Benutzer-spezif
 Es handelt sich um reine Selbsttests mit direktem Feedback, was richtig/falsch beantwortet wurde.
 Es existieren keine Abhängigkeiten zu externen Servern und es findet entsprechend kein Datenaustausch mit anderen Servern statt.
 
-## Code-Dokumentation
-Eine aus den Dokumentationskommentaren generierte Code-Dokumentation für Entwickler findet sich unter https://orca-nrw.github.io/anomaly_trainer/docs/.
-
-Der `libs`-Ordner enthält wiederverwendete Webkomponenten, Bibliotheken und Frameworks.
-
-Der `versions`-Ordner enthält alles was nötig ist, um auch ältere Versionen weiter lauffähig zu halten und um die Anwendung auch in anderen Webseiten (mit absoluten statt relativen Pfaden) flexibel einsetzen zu können.
-
 ## Lizenzen
 Der [Anomalie-Trainer](https://github.com/orca-nrw/anomaly_trainer) wurde
 von [André Kless](https://h-brs.de/de/inf/andre-kless) im Rahmen
